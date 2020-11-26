@@ -1,3 +1,4 @@
+require 'time'
 require 'net/http'
 require 'json'
 require_relative 'queries'
@@ -50,19 +51,21 @@ class FreeGames
   class Attributes
     def self.runner
       free_games = FreeGames.games_get
+      dates = dates_get(free_games)
+      p dates
       slugs = slugs_get(free_games)
       pubs_n_devs = pubs_n_devs_get(free_games)
       price = price_get(free_games)
-      ids = slugs.map { |game| game.chomp('/home') } # %r{^[^\/]}
-      p ids
-      game_info = game_info_get(ids)
+      # ids = slugs.map { |game| game.chomp('/home') } # %r{^[^\/]}
+      # p ids
+      # pubs_n_devs = pubs_n_devs_get(free_games)
+      # game_info = game_info_get(ids)
       # ratings = ratings_get(ids)
       # videos = videos_get(game_info)
       # descriptions = descriptions_get(game_info)
       # images = images_get(game_info)
-      # requirements = requirements_get(game_info)
       # languages = languages_get(game_info)
-      p hardwire_specs_get(game_info)
+      # p hardwire_specs_get(game_info)
       # {
       #   slugs: slugs,
       #   pubs_n_devs: pubs_n_devs,
@@ -185,7 +188,16 @@ class FreeGames
       end
       str.split("\n\n")
     end
-    # parse effective dates
+
+
+    def self.dates_get(games)
+      games.map do |game|
+        promo = game['promotions'].values.flatten.first['promotionalOffers'].first
+        to_msk = proc { |date| (Time.parse(date) + 60 * 60 * 3).strftime('%d/%m/%Y %H:%M MSK') }
+        [promo['startDate'], promo['endDate']].map(&to_msk)
+      end
+    end
+
     # parse ratings
   end
 end
