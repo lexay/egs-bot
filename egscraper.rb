@@ -1,3 +1,4 @@
+require 'yaml'
 require 'time'
 require 'net/http'
 require 'json'
@@ -51,21 +52,27 @@ class FreeGames
   class Attributes
     def self.runner
       free_games = FreeGames.games_get
-      dates = dates_get(free_games)
-      p dates
       slugs = slugs_get(free_games)
-      pubs_n_devs = pubs_n_devs_get(free_games)
-      price = price_get(free_games)
       # ids = slugs.map { |game| game.chomp('/home') } # %r{^[^\/]}
-      # p ids
+      ids = ['dungeons-3', 'mudrunner', 'assassins-creed-valhalla']
+      game_info = game_info_get(ids)
+
+      # ref = refs_get(game_info)
+      # p ref
+
+      # p game_info
+      # p free_games
+      # dates = dates_get(free_games)
       # pubs_n_devs = pubs_n_devs_get(free_games)
-      # game_info = game_info_get(ids)
+      # price = price_get(free_games)
+      # titles = titles(game_info)
       # ratings = ratings_get(ids)
-      # videos = videos_get(game_info)
+      videos = videos_get(game_info)
+      # p videos
       # descriptions = descriptions_get(game_info)
       # images = images_get(game_info)
       # languages = languages_get(game_info)
-      # p hardwire_specs_get(game_info)
+      # hw = hardwire_specs_get(game_info)
       # {
       #   slugs: slugs,
       #   pubs_n_devs: pubs_n_devs,
@@ -93,19 +100,21 @@ class FreeGames
         dev_hash = game['customAttributes'].map { |split_hash| [split_hash.values].to_h }
         dev_hash.find_all { |dev| dev['developerName'] || dev['publisherName'] }
       end
-      devs.map { |dev| dev.map(&:values).flatten.join(' - ') }
+      devs.map { |dev| dev.map(&:values).flatten.join(' / ') }
     end
 
     def self.ratings_get(ids)
       list = []
       ids.each do |id|
-        query = { query: RATINGS, variables: { id: "EPIC_#{id}" } }.to_json
+        query = { query: RATINGS, variables: { sku: "EPIC_#{id}" } }.to_json
         list.push(
           Requests.post(GQL, body: query, content: 'application/json;charset=utf-8')
         )
         sleep rand(0.75..1.5)
       end
-      list
+      score = list.map { |e| e.dig('data', 'OpenCritic', 'productReviews', 'openCriticScore') || '-' }
+      percent = list.map { |e| e.dig('data', 'OpenCritic', 'productReviews', 'percentRecommended') || '-' }
+      [score, percent].transpose
     end
 
     def self.game_info_get(ids)
@@ -119,31 +128,47 @@ class FreeGames
 
     def self.refs_get(game_info)
       list = []
-      game_info.each do |ref|
-        ref_fmt = ref['pages'].first['data']['carousel']['items'].first['video']['recipes']
-        list.push ref_fmt.scan(/(?<=mediaRefId\": \")\w+(?=\")/) unless ref_fmt.nil?
+      # pages = game_info.map { |game| game['pages'] }.flatten
+      # items = pages.map { |page| page['data']['carousel']['items'] }.flatten
+      # recipes = items.map { |item| item['video']['recipes'] }.compact
+      # media_refs = recipes.map { |recipe| recipe.scan(/(?<=mediaRefId\": \")\w+(?=\")/) unless recipe.empty? }
+      # p media_refs.count
+      game_info.each do |game|
+        game_ref = game['pages'].map do |page|
+          page['data']['carousel']['items'].first['video']['recipes'] || nil
+        end.join
+        list.push YAML.safe_load(game_ref)
       end
-      list
+      en_refs = list.map { |ref| ref['en-US'] unless ref.nil? }
+      webm = en_refs.map { |game| game&.select { |ref| ref['recipe'] == 'video-webm' } }
+      webm_refs = webm.map { |game| game&.map { |webm_ref| webm_ref['mediaRefId'] } }
+      p webm_refs
     end
 
     def self.videos_get(game_info)
       list = []
       media_refs = refs_get(game_info).flatten
       media_refs.each do |ref|
+        if ref.nil?
+          list.push ''
+          next
+        end
+
         query = { query: MEDIA, variables: { mediaRefId: ref } }.to_json
         list.push(
           Requests.post(GQL, body: query, content: 'application/json;charset=utf-8')
         )
         sleep rand(0.75..1.5)
       end
-      videos = list.map { |e| e.dig('data', 'Media', 'getMediaRef', 'outputs') }.flatten
-      videos.find_all { |e| e['url'] if e['key'] == 'high' && e['contentType'] == 'video/webm' }
+      p list
+      # videos = list.map { |e| e.dig('data', 'Media', 'getMediaRef', 'outputs') }.flatten
+      # videos.find_all { |e| e['url'] if e['key'] == 'high' && e['contentType'] == 'video/webm' }
     end
 
     def self.descriptions_get(game_info)
       list = []
       game_info.each do |e|
-        list.push full_desc: e['pages'].first.dig('data', 'about', 'description')
+        list.push full_desc: e['pages'].first.dig('data', 'about', 'description') || 'Отсутствует'
         list.push short_desc: e['pages'].first.dig('data', 'about', 'shortDescription')
       end
       list
@@ -196,6 +221,10 @@ class FreeGames
         to_msk = proc { |date| (Time.parse(date) + 60 * 60 * 3).strftime('%d/%m/%Y %H:%M MSK') }
         [promo['startDate'], promo['endDate']].map(&to_msk)
       end
+    end
+
+    def self.titles(game_info)
+      game_info.map { |game| game['productName'] }
     end
 
     # parse ratings
