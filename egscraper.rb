@@ -150,7 +150,7 @@ class FreeGames
       media_refs = refs_get(game_info).flatten
       media_refs.each do |ref|
         if ref.nil?
-          list.push ''
+          list.push ref
           next
         end
 
@@ -160,9 +160,13 @@ class FreeGames
         )
         sleep rand(0.75..1.5)
       end
-      p list
-      # videos = list.map { |e| e.dig('data', 'Media', 'getMediaRef', 'outputs') }.flatten
-      # videos.find_all { |e| e['url'] if e['key'] == 'high' && e['contentType'] == 'video/webm' }
+      # p list
+      videos = list.map { |e| e&.dig('data', 'Media', 'getMediaRef', 'outputs') }
+      # p videos
+      parsed_videos = videos.map { |video| video&.find_all { |e| e['url'] if e['key'] == 'high' } }.flatten
+      p parsed_videos
+      result = parsed_videos.map { |video| video['url'] unless video.nil? }
+      p result
     end
 
     def self.descriptions_get(game_info)
