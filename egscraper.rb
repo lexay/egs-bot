@@ -53,8 +53,8 @@ class FreeGames
     def self.runner
       free_games = FreeGames.games_get
       slugs = slugs_get(free_games)
-      # ids = slugs.map { |game| game.chomp('/home') } # %r{^[^\/]}
-      ids = ['dungeons-3', 'mudrunner', 'assassins-creed-valhalla']
+      ids = slugs.map { |game| game.chomp('/home') } # %r{^[^\/]}
+      # ids = ['dungeons-3', 'mudrunner', 'assassins-creed-valhalla']
       game_info = game_info_get(ids)
 
       # ref = refs_get(game_info)
@@ -64,15 +64,23 @@ class FreeGames
       # p free_games
       # dates = dates_get(free_games)
       # pubs_n_devs = pubs_n_devs_get(free_games)
+      # p pubs_n_devs
       # price = price_get(free_games)
+      # p price
       # titles = titles(game_info)
+      # p titles
       # ratings = ratings_get(ids)
+      # p ratings
       videos = videos_get(game_info)
-      # p videos
+      p videos
       # descriptions = descriptions_get(game_info)
+      # p descriptions
       # images = images_get(game_info)
+      # p images
       # languages = languages_get(game_info)
-      # hw = hardwire_specs_get(game_info)
+      # p languages
+      hw = hardwire_specs_get(game_info)
+      p hw
       # {
       #   slugs: slugs,
       #   pubs_n_devs: pubs_n_devs,
@@ -141,8 +149,7 @@ class FreeGames
       end
       en_refs = list.map { |ref| ref['en-US'] unless ref.nil? }
       webm = en_refs.map { |game| game&.select { |ref| ref['recipe'] == 'video-webm' } }
-      webm_refs = webm.map { |game| game&.map { |webm_ref| webm_ref['mediaRefId'] } }
-      p webm_refs
+      webm.map { |game| game&.map { |webm_ref| webm_ref['mediaRefId'] } }
     end
 
     def self.videos_get(game_info)
@@ -160,13 +167,9 @@ class FreeGames
         )
         sleep rand(0.75..1.5)
       end
-      # p list
       videos = list.map { |e| e&.dig('data', 'Media', 'getMediaRef', 'outputs') }
-      # p videos
       parsed_videos = videos.map { |video| video&.find_all { |e| e['url'] if e['key'] == 'high' } }.flatten
-      p parsed_videos
-      result = parsed_videos.map { |video| video['url'] unless video.nil? }
-      p result
+      parsed_videos.map { |video| video['url'] unless video.nil? }
     end
 
     def self.descriptions_get(game_info)
@@ -205,10 +208,17 @@ class FreeGames
           title = spec['title']
           min = spec['minimum']
           rec = spec['recommended']
-          if min == rec || min.nil?
+          # if title == 'Место на диске' && /\d$/.match(rec)
+          #   rec + 'ГБ'
+          # elsif title == 'Место на диске' && /\d$/.match(min)
+          #   min + 'ГБ'
+          # end
+          if min == rec
             str << (title + ': ' + rec) << "\n"
-          elsif rec.empty?
+          elsif min && (!rec || rec.empty?)
             str << (title + ': ' + min) << "\n"
+          elsif rec && (!min || min.empty?)
+            str << (title + ': ' + rec) << "\n"
           else
             str << (title + ': ' + min + ' | ' + rec) << "\n"
           end
@@ -230,8 +240,6 @@ class FreeGames
     def self.titles(game_info)
       game_info.map { |game| game['productName'] }
     end
-
-    # parse ratings
   end
 end
 
