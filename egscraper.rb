@@ -8,6 +8,7 @@ class FreeGames
   PROMO = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=RU&allowCountries=RU'.freeze
   GQL = 'https://www.epicgames.com/graphql'.freeze
   GAME_INFO = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
+  PRODUCT = 'https://www.epicgames.com/store/ru/product/'.freeze
 
   def self.games_get
     games_hash = Requests.get(PROMO, content: 'application/json;charset=utf-8')
@@ -57,40 +58,40 @@ class FreeGames
       # ids = ['dungeons-3', 'mudrunner', 'assassins-creed-valhalla']
       game_info = game_info_get(ids)
 
-      # ref = refs_get(game_info)
-      # p ref
-
-      # p game_info
-      # p free_games
-      # dates = dates_get(free_games)
-      # pubs_n_devs = pubs_n_devs_get(free_games)
-      # p pubs_n_devs
-      # price = price_get(free_games)
-      # p price
       # titles = titles(game_info)
       # p titles
-      # ratings = ratings_get(ids)
-      # p ratings
-      videos = videos_get(game_info)
-      p videos
+      # pubs_n_devs = pubs_n_devs_get(free_games)
+      # p pubs_n_devs
+      # dates = dates_get(free_games)
+      # p dates
       # descriptions = descriptions_get(game_info)
       # p descriptions
+      # price = price_get(free_games)
+      # p price
+      # ratings = ratings_get(ids)
+      # p ratings
+      # videos = videos_get(game_info)
+      # p videos
       # images = images_get(game_info)
       # p images
       # languages = languages_get(game_info)
       # p languages
-      hw = hardwire_specs_get(game_info)
-      p hw
-      # {
-      #   slugs: slugs,
-      #   pubs_n_devs: pubs_n_devs,
-      #   price: price,
-      #   ratings: ratings,
-      #   videos: videos,
-      #   descriptions: descriptions,
-      #   images: images,
-      #   requirements: requirements
-      # }
+      # hw = hardwire_specs_get(game_info)
+      # p hw
+      hh = {
+        titles: titles(game_info),
+        pubs_n_devs: pubs_n_devs_get(free_games),
+        dates: dates_get(free_games),
+        descriptions: descriptions_get(game_info),
+        urls: urls_get(ids),
+        price: price_get(free_games),
+        ratings: ratings_get(ids),
+        videos: videos_get(game_info),
+        images: images_get(game_info),
+        languages: languages_get(game_info),
+        hw: hardwire_specs_get(game_info)
+      }
+      p hh
     end
 
     def self.slugs_get(games)
@@ -240,7 +241,12 @@ class FreeGames
     def self.titles(game_info)
       game_info.map { |game| game['productName'] }
     end
+
+    def self.urls_get(ids)
+      ids.map { |id| PRODUCT + id }
+    end
   end
 end
 
 FreeGames::Attributes.runner
+# Social?
