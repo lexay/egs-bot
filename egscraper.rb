@@ -138,11 +138,6 @@ class FreeGames
 
     def self.refs_get(game_info)
       list = []
-      # pages = game_info.map { |game| game['pages'] }.flatten
-      # items = pages.map { |page| page['data']['carousel']['items'] }.flatten
-      # recipes = items.map { |item| item['video']['recipes'] }.compact
-      # media_refs = recipes.map { |recipe| recipe.scan(/(?<=mediaRefId\": \")\w+(?=\")/) unless recipe.empty? }
-      # p media_refs.count
       game_info.each do |game|
         game_ref = game['pages'].map do |page|
           page['data']['carousel']['items'].first['video']['recipes'] || nil
