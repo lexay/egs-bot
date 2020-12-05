@@ -76,22 +76,22 @@ class FreeGames
       # p images
       # languages = languages_get(game_info)
       # p languages
-      # hw = hardwire_specs_get(game_info)
+      # hw = hardware_get(game_info)
       # p hw
-      hh = {
-        titles: titles(game_info),
-        pubs_n_devs: pubs_n_devs_get(free_games),
-        dates: dates_get(free_games),
-        descriptions: descriptions_get(game_info),
-        urls: urls_get(ids),
-        price: price_get(free_games),
-        ratings: ratings_get(ids),
-        videos: videos_get(game_info),
-        images: images_get(game_info),
-        languages: languages_get(game_info),
-        hw: hardwire_specs_get(game_info)
-      }
-      p hh
+      # hh = {
+      #   titles: titles(game_info),
+      #   pubs_n_devs: pubs_n_devs_get(free_games),
+      #   dates: dates_get(free_games),
+      #   descriptions: descriptions_get(game_info),
+      #   urls: urls_get(ids),
+      #   price: price_get(free_games),
+      #   ratings: ratings_get(ids),
+      #   videos: videos_get(game_info),
+      #   images: images_get(game_info),
+      #   languages: languages_get(game_info),
+      #   hw: hardware_get(game_info)
+      # }
+      # p hh
       # testing tests
     end
 
@@ -150,51 +150,51 @@ class FreeGames
     end
 
     def self.videos_get(game_info)
-      videos = []
+      vid_attrs = []
       media_refs = refs_get(game_info).flatten
       media_refs.each do |ref|
         if ref.nil?
-          videos.push ref
+          vid_attrs.push ref
           next
         end
 
         query = { query: MEDIA, variables: { mediaRefId: ref } }.to_json
-        videos.push(
+        vid_attrs.push(
           Requests.post(GQL, body: query, content: 'application/json;charset=utf-8')
         )
         sleep rand(0.75..1.5)
       end
-      all_res_videos = videos.map { |e| e&.dig('data', 'Media', 'getMediaRef', 'outputs') }
-      high_res_videos = all_res_videos.map { |video| video&.find_all { |e| e['key'] == 'high' } }.flatten
+      videos = vid_attrs.map { |attr| attr&.dig('data', 'Media', 'getMediaRef', 'outputs') }
+      high_res_videos = videos.map { |video| video&.find_all { |e| e['key'] == 'high' } }.flatten
       high_res_videos.map { |video| video['url'] unless video.nil? }
     end
 
     def self.descriptions_get(game_info)
       descriptions = []
-      game_info.each do |e|
-        descriptions.push full_desc: e['pages'].first.dig('data', 'about', 'description') || 'Отсутствует'
-        descriptions.push short_desc: e['pages'].first.dig('data', 'about', 'shortDescription')
+      game_info.each do |game|
+        descriptions.push full_desc: game['pages'].first.dig('data', 'about', 'description') || 'Отсутствует'
+        descriptions.push short_desc: game['pages'].first.dig('data', 'about', 'shortDescription')
       end
       descriptions
     end
 
     def self.images_get(game_info)
       images = []
-      game_info.each do |e|
-        images.push e['pages'].first['_images_']
+      game_info.each do |game|
+        images.push(game['pages'].first['_images_'].find_all { |image| /\.png$/.match(image) }.first)
       end
       images
     end
 
     def self.requirements_get(game_info)
-      game_info.map { |e| e['pages'].first['data']['requirements'] }
+      game_info.map { |game| game['pages'].first['data']['requirements'] }
     end
 
     def self.languages_get(game_info)
-      requirements_get(game_info).map { |e| e['languages'].join.strip }
+      requirements_get(game_info).map { |req| req['languages'].join.strip }
     end
 
-    def self.hardwire_specs_get(game_info)
+    def self.hardware_get(game_info)
       requirements_fmt = String.new
       requirements = requirements_get(game_info).map { |e| e['systems'] }
       os_types = requirements.map { |os| os.map { |spec| spec['systemType'] } }.flatten
