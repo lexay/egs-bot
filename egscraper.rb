@@ -92,6 +92,7 @@ class FreeGames
         hw: hardwire_specs_get(game_info)
       }
       p hh
+      # testing tests
     end
 
     def self.slugs_get(games)
