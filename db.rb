@@ -1,4 +1,4 @@
-class GameDB
+class GameModel
   attr_accessor :title, :description, :short_description, :game_uri, :pic_url
   attr_accessor :date_from, :date_upto, :avail
 
