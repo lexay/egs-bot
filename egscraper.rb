@@ -54,8 +54,9 @@ class FreeGames
     def self.runner
       free_games = FreeGames.games_get
       slugs = slugs_get(free_games)
-      # ids = slugs.map { |game| game.chomp('/home') } # %r{^[^\/]}
-      ids = ['dungeons-3', 'mudrunner', 'assassins-creed-valhalla']
+      ids = slugs.map { |game| game.chomp('/home')[/[-[:alnum:]]+/] } # %r{^[^\/]}
+      p ids
+      # ids = ['dungeons-3', 'mudrunner', 'assassins-creed-valhalla']
       game_info = game_info_get(ids)
 
       # titles = titles(game_info)
@@ -130,7 +131,7 @@ class FreeGames
     def self.game_info_get(ids)
       games = []
       ids.each do |id|
-        games.push Requests.get(GAME_INFO + id)
+        games.push Requests.get(GAME_INFO + id) if id
         sleep rand(0.75..1.5)
       end
       games
