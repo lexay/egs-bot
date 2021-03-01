@@ -7,7 +7,8 @@ require_relative 'queries'
 class FreeGames
   PROMO = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=RU&allowCountries=RU'.freeze
   GQL = 'https://www.epicgames.com/graphql'.freeze
-  GAME_INFO = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
+  GAME_INFO_RU = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
+  GAME_INFO = 'https://store-content.ak.epicgames.com/api/en-US/content/products/'.freeze
   PRODUCT = 'https://www.epicgames.com/store/ru/product/'.freeze
 
   class << self
@@ -16,7 +17,8 @@ class FreeGames
       games_hash.dig('data', 'Catalog', 'searchStore', 'elements')
     end
 
-    def promotions_get(free_games)
+    def promotions_get
+      free_games = games_get
       current_promotions = []
       upcoming_promotions = []
       free_games.each do |game|
@@ -69,65 +71,51 @@ class FreeGames
   class Attributes
     class << self
       def runner
-        free_games = FreeGames.games_get
-        # p free_games
-        promotions = FreeGames.promotions_get(free_games)
-        # p promotions
-        # p hash_form(holiday_game)
-        slugs = slugs_get(promotions)
-        # p slugs
-        ids = slugs.map { |game| game.chomp('/home')[/[-[:alnum:]]+/] } # %r{^[^\/]}
-        p ids
+        promotions = FreeGames.promotions_get
+        p promotions
+        # ids = ids_get(promotions)
         # ids = ['dungeons-3', 'mudrunner', 'assassins-creed-valhalla', 'solitairica']
-        # ids = ['mudrunner']
-        game_info = game_info_get(ids)
-        # p game_info
-        # p game_info.first['pages'].first['type']
-        # p game_info.count
-        # p game_info.first['pages'].first
-        main_games = main_game_get(game_info)
-        p main_games
-
-        # all_games = game_info.last['pages'].map { |game| game.dig('data', 'about', 'title') }
-        # p all_games
-        # p game_info.last['pages'].first['type']
-        # titles = titles_get(game_info)
+        # ids = ['assassins-creed-valhalla']
+        # main_games = main_game_get(ids)
+        # p main_games
+        # p main_games.count
+        # titles = titles_get(main_games)
         # p titles
-        # pubs_n_devs = pubs_n_devs_get(free_games)
+
+        # pubs_n_devs = pubs_n_devs_get(promotions)
         # p pubs_n_devs
-        # dates = dates_get(free_games)
+        # dates = dates_get(promotions)
         # p dates
-        # descriptions = descriptions_get(game_info)
+        # descriptions = descriptions_get(main_games)
         # p descriptions
-        # price = price_get(free_games)
+        # price = price_get(promotions)
         # p price
         # ratings = ratings_get(ids)
         # p ratings
-        # videos = videos_get(game_info)
+        # videos = videos_get(main_games)
         # p videos
-        # images = images_get(game_info)
+        # images = images_get(main_games)
         # p images
-        # languages = languages_get(game_info)
+        # languages = languages_get(main_games)
         # p languages
-        # hw = hardware_get(game_info)
+        # hw = hardware_get(main_games)
         # p hw
-        # hh = {
-        # testing tests
       end
 
-      def slugs_get(games)
-        games.flatten.map { |game| game['productSlug'] }
+      def ids_get(games)
+        slugs = games.flatten.map { |game| game['productSlug'] }
+        slugs.map { |game| game.chomp('/home')[/[-[:alnum:]]+/] } # %r{^[^\/]}
       end
 
       def price_get(games)
         games.map do |game|
-          game.dig('price', 'totalPrice', 'fmtPrice', 'originalPrice')
+          game.first.dig('price', 'totalPrice', 'fmtPrice', 'originalPrice')
         end
       end
 
       def pubs_n_devs_get(games)
         devs = games.map do |game|
-          dev_hash = game['customAttributes'].map { |split_hash| [split_hash.values].to_h }
+          dev_hash = game.first['customAttributes'].map { |split_hash| [split_hash.values].to_h }
           dev_hash.find_all { |dev| dev['developerName'] || dev['publisherName'] }
         end
         devs.map { |dev| dev.map(&:values).flatten.join(' / ') }
@@ -156,7 +144,8 @@ class FreeGames
         games
       end
 
-      def main_game_get(games)
+      def main_game_get(ids)
+        games = game_info_get(ids)
         main_games = []
         games.each do |game|
           # p game['pages']
@@ -170,11 +159,10 @@ class FreeGames
       def refs_get(game_info)
         refs = []
         game_info.each do |game|
-          game_ref = game['pages'].map do |page|
-            page.dig('data', 'carousel', 'items').first.dig('video', 'recipes') || nil
-          end.join
+          game_ref = (game.dig('data', 'carousel', 'items').first.dig('video', 'recipes') || nil)
           refs.push YAML.safe_load(game_ref)
         end
+
         en_refs = refs.map { |ref| ref['en-US'] unless ref.nil? }
         webm = en_refs.map { |game| game&.select { |ref| ref['recipe'] == 'video-webm' } }
         webm.map { |game| game&.map { |webm_ref| webm_ref['mediaRefId'] } }
@@ -203,22 +191,23 @@ class FreeGames
       def descriptions_get(game_info)
         descriptions = []
         game_info.each do |game|
-          descriptions.push full_desc: game['pages'].first.dig('data', 'about', 'description') || 'Отсутствует'
-          descriptions.push short_desc: game['pages'].first.dig('data', 'about', 'shortDescription')
+          full_desc = game.dig('data', 'about', 'description') || '-'
+          short_desc = game.dig('data', 'about', 'shortDescription')
+          descriptions.push [full_desc, short_desc]
         end
-        descriptions
+        descriptions.map { |desc_pair| desc_pair.map { |desc| desc[/[^)].+/m].strip } } # [/(?<=\))?(.)+/m]
       end
 
       def images_get(game_info)
         images = []
         game_info.each do |game|
-          images.push(game['pages'].first['_images_'].find_all { |image| /\.png$/.match(image) }.first)
+          images.push(game['_images_'].find_all { |image| /\.png$/.match(image) }.first)
         end
         images
       end
 
       def requirements_get(game_info)
-        game_info.map { |game| game['pages'].first.dig('data', 'requirements') }
+        game_info.map { |game| game.dig('data', 'requirements') }
       end
 
       def languages_get(game_info)
@@ -258,14 +247,19 @@ class FreeGames
 
       def dates_get(games)
         games.map do |game|
-          promo = game['promotions'].values.flatten.first['promotionalOffers'].first
+          cur_promo = game.first['promotions']['promotionalOffers']
+          up_promo = game.first['promotions']['upcomingPromotionalOffers']
+          promo = (cur_promo.empty? ? up_promo : cur_promo).first
+          offers = promo['promotionalOffers'].first
+          # promo = game.first['promotions'].values.flatten.first
+          # offers = promo['promotionalOffers'].first
           to_msk = proc { |date| (Time.parse(date) + 60 * 60 * 3).strftime('%d/%m/%Y %H:%M MSK') }
-          [promo['startDate'], promo['endDate']].map(&to_msk)
+          [offers['startDate'], offers['endDate']].map(&to_msk)
         end
       end
 
-      def titles_get(game_info)
-        game_info.first['pages'].map { |game| game.dig('data', 'about', 'title') if game['type'] == 'productHome' }.compact
+      def titles_get(games)
+        games.map { |game| game.dig('data', 'navTitle').strip } #.compact
       end
 
       def urls_get(ids)
