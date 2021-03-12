@@ -1,7 +1,6 @@
 require 'hashie'
 require 'json'
 require 'net/http'
-require 'pry'
 require 'time'
 require 'yaml'
 require_relative 'queries'
@@ -72,8 +71,7 @@ class Parser
 
       def run
         promotions = Promotions.current
-        scraped_info = bootstrap(promotions)
-        binding.pry
+        bootstrap(promotions)
       end
 
       private
@@ -118,7 +116,7 @@ class Parser
       end
 
       def ids_get(game)
-        game['productSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
+        game['productSlug'].chomp('/home')[/[-[:alnum:]]+/]
       end
 
       def price_get(game)
@@ -190,13 +188,11 @@ class Parser
       def short_description_get(game)
         desc = game.deep_find('shortDescription') || '-'
         sanitize(desc)
-        # Try String partition method for sanitizing
       end
 
       def full_description_get(game)
         desc = game.deep_find('description') || '-'
         sanitize(desc)
-        # Try String partition method for sanitizing
       end
 
       def sanitize(description)
@@ -244,7 +240,7 @@ class Parser
       end
 
       def title_get(game)
-        game.deep_find('navTitle').strip #.compact
+        game.deep_find('navTitle').strip
       end
 
       def urls_get(ids)
