@@ -1,17 +1,12 @@
-class GameModel
-  attr_accessor :title, :description, :short_description, :game_uri, :pic_url
-  attr_accessor :date_from, :date_upto, :avail
+class FreeGame
+  attr_accessor :title, :full_description, :short_description, :game_uri,
+                :start_date, :end_date, :pubs_n_devs, :price, :hardware,
+                :videos, :languages, :rating, :available
 
   def initialize(**args)
-    %w[
-      title
-      description
-      short_description
-      game_uri
-      pic_url
-      date_from
-      date_upto
-      avail
-    ].each { |m| instance_variable_set('@' << m, args[m.to_sym]) }
+    %w[ title full_description short_description game_uri start_date end_date
+        pubs_n_devs price hardware videos languages rating available].each do |m|
+          instance_variable_set('@' << m, args[m.to_sym])
+        end
   end
 end
