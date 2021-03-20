@@ -80,17 +80,18 @@ class Parser
         first_part = first_part_get(promotions)
         ids = promotions.map { |game| ids_get(game) }
         ratings = ratings_get(ids)
+        uris = game_uris_get(ids)
         main_games = main_games_get(ids)
         second_part = second_part_get(main_games)
         first_part.map.with_index do |hash, idx|
-          hash.merge(second_part[idx], ratings[idx])
+          hash.merge(second_part[idx], ratings[idx], uris[idx], id: idx, timestamp: Time.now.to_s)
         end
       end
 
       def first_part_get(promotions)
         promotions.map do |game|
           hh = {}
-          %w[start_date end_date pubs_n_devs price].each do |name|
+          %w[start_date end_date pubs_n_devs price available].each do |name|
             hh[name.to_sym] = method(name << '_get').call(game)
           end
           hh
@@ -120,7 +121,8 @@ class Parser
       end
 
       def price_get(game)
-        game.deep_find('originalPrice') / 100
+        original_price = game.deep_find('originalPrice')
+        original_price.positive? ? original_price / 100 : 'Пока неизвестна'
       end
 
       def pubs_n_devs_get(game)
@@ -129,6 +131,10 @@ class Parser
             attribute['key'] == 'publisherName'
         end
         devs.map { |dev_or_pub| dev_or_pub['value'] }.join(' / ')
+      end
+
+      def available_get(game)
+        Time.parse(start_date_get(game)) - Time.now > 0 ? 'next' : 'now'
       end
 
       def ratings_get(ids)
@@ -149,7 +155,7 @@ class Parser
       def game_info_get(ids)
         games = []
         ids.each do |id|
-          games.push Requests.get(GAME_INFO + id) if id
+          games.push Requests.get(GAME_INFO_RU + id) if id
           sleep rand(0.75..1.5)
         end
         games
@@ -210,7 +216,7 @@ class Parser
       end
 
       def languages_get(game)
-        game.deep_find('languages')
+        game.deep_find('languages').join
       end
 
       def hardware_get(game)
@@ -236,18 +242,17 @@ class Parser
           end
           requirements_fmt << "\n"
         end
-        requirements_fmt.split("\n\n")
+        requirements_fmt #.split("\n\n")
       end
 
       def title_get(game)
         game.deep_find('navTitle').strip
       end
 
-      def urls_get(ids)
-        ids.map { |id| PRODUCT + id }
+      def game_uris_get(ids)
+        ids.map { |id| { game_uri: PRODUCT + id } }
       end
     end
   end
 end
 
-Parser::Promotions.run
