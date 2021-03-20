@@ -86,7 +86,7 @@ class Parser
         main_games = main_games_get(ids)
         second_part = second_part_get(main_games)
         first_part.map.with_index do |hash, idx|
-          hash.merge(second_part[idx], ratings[idx], uris[idx])
+          hash.merge(second_part[idx], ratings[idx], uris[idx], id: idx, timestamp: Time.now.to_s)
         end
       end
 
@@ -123,7 +123,8 @@ class Parser
       end
 
       def price_get(game)
-        game.deep_find('originalPrice') / 100
+        original_price = game.deep_find('originalPrice')
+        original_price.positive? ? original_price / 100 : 'Пока неизвестна'
       end
 
       def pubs_n_devs_get(game)
@@ -156,7 +157,7 @@ class Parser
       def game_info_get(ids)
         games = []
         ids.each do |id|
-          games.push Requests.get(GAME_INFO + id) if id
+          games.push Requests.get(GAME_INFO_RU + id) if id
           sleep rand(0.75..1.5)
         end
         games
