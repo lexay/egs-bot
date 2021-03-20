@@ -1,4 +1,3 @@
-require 'pry'
 require_relative 'egscraper'
 require_relative 'db_controller'
 
@@ -15,4 +14,3 @@ DB.create if DB.table_empty?
 scraped_promotions.each do |promotion|
   DB.insert FreeGame.new(promotion)
 end
-binding.pry
