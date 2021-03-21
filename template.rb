@@ -10,13 +10,12 @@ module Template
         message = <<~MESSAGE
           #{availability} раздача от ЕГС с #{format game.start_date} по #{format game.end_date}:
 
-          <strong>Название:</strong> #{game.title}
+          <strong>Название:</strong> <a href='#{game.game_uri}'>#{game.title}</a>
 
           <strong>Издатель / Разработчик:</strong> #{game.pubs_n_devs}
 
           <strong>Описание:</strong>
           #{game.short_description}
-          <a href='#{game.game_uri}'>Перейти</a>
           \n
         MESSAGE
         text << message

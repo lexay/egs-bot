@@ -7,6 +7,7 @@ module TeleBot
     def listen
       Telegram::Bot::Client.run(ENV['T_TOKEN']) do |bot|
         bot.listen do |message|
+          mini_logger(message)
           case message.text
           when '/now'
             bot.api.send_message(chat_id: message.chat.id, text: BotCommand.now, parse_mode: 'HTML')
@@ -14,7 +15,6 @@ module TeleBot
             bot.api.send_message(chat_id: message.chat.id, text: BotCommand.next, parse_mode: 'HTML')
           when '/help'
             bot.api.send_message(chat_id: message.chat.id, text: BotCommand.help, parse_mode: 'HTML')
-            mini_logger(message)
           else
             bot.api.send_message(chat_id: message.chat.id, text: BotCommand.message_missing(message))
             bot.api.send_message(chat_id: message.chat.id, text: BotCommand.help, parse_mode: 'HTML')
