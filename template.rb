@@ -2,13 +2,12 @@ require 'time'
 
 module Template
   class << self
-    def make(games)
+    def new(games)
       text = String.new
       games.each do |game|
-        availability = game.available == 'now' ? 'Текущая' : 'Следующая'
 
         message = <<~MESSAGE
-          #{availability} раздача от ЕГС с #{format game.start_date} по #{format game.end_date}:
+          Текущая раздача от ЕГС с #{format game.start_date} по #{format game.end_date}:
 
           <strong>Название:</strong> #{game.title}
 
@@ -16,7 +15,7 @@ module Template
 
           <strong>Описание:</strong>
           #{game.short_description}
-          <a href='#{game.game_uri}'>Перейти</a>
+          <a href='#{game.game_uri}'>...</a>
           \n
         MESSAGE
         text << message

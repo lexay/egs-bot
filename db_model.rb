@@ -1,9 +1,8 @@
 class FreeGame
   attr_accessor :id, :title, :full_description, :short_description, :game_uri,
-                :start_date, :end_date, :pubs_n_devs, :price, :hardware,
-                :videos, :languages, :rating, :available, :timestamp
+                :start_date, :end_date, :pubs_n_devs, :timestamp
 
-  def initialize(**args)
+  def initialize(**params)
     %w[
       id
       title
@@ -13,15 +12,9 @@ class FreeGame
       start_date
       end_date
       pubs_n_devs
-      price
-      hardware
-      videos
-      languages
-      rating
-      available
       timestamp
     ].each do |m|
-      instance_variable_set('@' << m, args[m.to_sym])
+      instance_variable_set('@' << m, params[m.to_sym])
     end
   end
 end
