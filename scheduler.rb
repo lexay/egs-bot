@@ -31,7 +31,7 @@ module Scheduler
     ids = DB.user_chat_ids
     games = DB.get
     ids.each do |chat_id|
-      TeleBot.bot.api.send_message(chat_id: chat_id, text: Template.make(games), parse_mode: 'html')
+      TeleBot.bot.api.send_message(chat_id: chat_id, text: Template.new(games), parse_mode: 'html')
     end
     sleep (Time.parse(games.first.end_date) - Time.now).to_i
   end
