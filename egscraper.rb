@@ -36,7 +36,7 @@ class Parser
           http.request(request)
         end
 
-        JSON.parse(response.body)
+        response.code == '200' ? JSON.parse(response.body) : []
       end
 
       def post(uri_string, **options)
@@ -53,7 +53,7 @@ class Parser
           http.request(request)
         end
 
-        JSON.parse(response.body)
+        response.code == '200' ? JSON.parse(response.body) : []
       end
     end
   end
