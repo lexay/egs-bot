@@ -11,7 +11,7 @@ module Schedule
       create(:free_games, :users)
 
       Thread.new do
-        logger = Logger.new(STDOUT)
+        logger = Logger.new($stdout)
         loop do
           games = parse
           store(games)
@@ -35,6 +35,7 @@ module Schedule
       5.times do
         promotions = Parser::Promotions.run
         return promotions unless promotions.empty?
+
         sleep rand(20..30)
       end
       []

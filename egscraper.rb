@@ -171,7 +171,7 @@ class Parser
         description.delete! '*'
         description.delete! '#'
         pattern = /!?\[.+\)/
-        description.partition(pattern).delete_if { |str| str =~ pattern }.join
+        description.partition(pattern).delete_if { |str| str =~ pattern }.join.strip
       end
 
       def title_get(game)
