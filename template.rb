@@ -14,7 +14,7 @@ module Template
           <strong>Издатель / Разработчик:</strong> #{game.pubs_n_devs}
 
           <strong>Описание:</strong>
-          #{game.short_description}
+          #{game.short_description.length < 10 ? game.full_description : game.short_description}
           <a href='#{game.game_uri}'>...</a>
           \n
         MESSAGE
