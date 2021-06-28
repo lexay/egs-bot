@@ -1,22 +1,22 @@
 require 'logger'
 require 'pry'
 require_relative 'bot_service'
-require_relative 'db_controller_new'
+require_relative 'models'
 require_relative 'egscraper'
 require_relative 'template'
 
 module Schedule
   class << self
     def plan
-      create(:free_games, :users)
 
       Thread.new do
         logger = Logger.new($stdout)
         loop do
           games = parse
+          # binding.pry
           store(games)
           # binding.pry
-          send(games.count, logger)
+          dispatch(games.count, logger)
           wait
         end
       end
@@ -24,16 +24,10 @@ module Schedule
 
     private
 
-    def create(*tables)
-      # DB.clear table if DB.table_exists? table
-      tables.each do |table|
-        DB.create table unless DB.table_exists? table
-      end
-    end
-
     def parse
       5.times do
         promotions = Parser::Promotions.run
+        # binding.pry
         return promotions unless promotions.empty?
 
         sleep rand(20..30)
@@ -43,18 +37,19 @@ module Schedule
 
     def store(games)
       games.each do |game|
-        DB.insert FreeGame.new(game)
+        FreeGame.new(game).save
       end
     end
 
-    def send(count, logger)
-      games = DB.games(count)
+    def dispatch(count, logger)
+      games = FreeGame.games(count)
       if games.empty?
         logger.info 'Games returned nothing! Skipping...'
         return
       end
 
-      chat_ids = DB.chat_ids
+      chat_ids = User.chat_ids
+      # binding.pry
       if chat_ids.empty?
         logger.info 'No subscribed users! Skipping...'
         return
@@ -77,7 +72,7 @@ module Schedule
 
         if process(exception)[:error_code] == '403'
           logger.info 'Invalid user. Unsubscribing...'
-          DB.unsubscribe(chat_id) 
+          User.unsubscribe chat_id
         end
 
         next
@@ -93,8 +88,9 @@ module Schedule
     end
 
     def wait
-      next_date = DB.games.first.end_date
-      next_date = next_date.nil? ? 60 * 60 * 24 : Time.parse(next_date) - Time.now
+      next_date = FreeGame.next_date
+      # binding.pry
+      next_date = next_date.nil? ? 60 * 60 * 24 : next_date - Time.now
       sleep next_date
     end
   end

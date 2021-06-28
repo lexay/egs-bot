@@ -91,7 +91,7 @@ class Parser
         main_games = main_games_get(ids)
         second_part = second_part_get(main_games)
         first_part.map.with_index do |hash, idx|
-          hash.merge(second_part[idx], uris[idx], timestamp: Time.now.to_s)
+          hash.merge(second_part[idx], uris[idx], timestamp: Time.now)
         end
       end
 
@@ -116,11 +116,11 @@ class Parser
       end
 
       def start_date_get(game)
-        game.deep_find('startDate')
+        Time.parse game.deep_find('startDate')
       end
 
       def end_date_get(game)
-        game.deep_find('endDate')
+        Time.parse game.deep_find('endDate')
       end
 
       def ids_get(game)

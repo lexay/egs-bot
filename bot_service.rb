@@ -2,7 +2,7 @@ require 'dotenv/load'
 require 'logger'
 require 'pry'
 require 'telegram/bot'
-require_relative 'db_controller'
+require_relative 'models'
 
 module TelegramService
   BOT = Telegram::Bot::Client.new(ENV['T_TOKEN'])
@@ -18,10 +18,10 @@ module TelegramService
             # BOT.api.get_chat_member(chat_id: message.chat.id, user_id: message.from.id)
             case user_status
             when 'member'
-              DB.insert User.new(name: message.chat.username, chat_id: message.chat.id, timestamp: Time.now.to_s)
+              User.new(name: message.chat.username, chat_id: message.chat.id, timestamp: Time.now).save
               logger.info "User: #{message.from.username}(#{message.chat.id}) is subscribed!"
             when 'kicked'
-              DB.unsubscribe message.chat.id
+              User.unsubscribe message.chat.id
               logger.info "User: #{message.from.username}(#{message.chat.id}) is unsubscribed!"
             end
           when Telegram::Bot::Types::Message
@@ -32,14 +32,13 @@ module TelegramService
     end
 
     def time_left
-      games = DB.games
+      date = FreeGame.next_date
       # binding.pry
       if games.empty?
         puts 'Следующая раздача неизвестна!'
         return
       end
-      game = games.first
-      days_in_sec = (Time.parse(game.end_date) - Time.now).to_i
+      days_in_sec = date - Time.now
       days, hours_in_sec = days_in_sec.divmod(60 * 60 * 24)
       hours, minutes_in_sec = hours_in_sec.divmod(60 * 60)
       minutes, seconds = minutes_in_sec.divmod(60)
