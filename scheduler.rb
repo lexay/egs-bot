@@ -34,7 +34,6 @@ module Schedule
     def parse
       5.times do
         promotions = Parser::Promotions.run
-        # binding.pry
         return promotions unless promotions.empty?
 
         sleep rand(20..30)
@@ -50,10 +49,6 @@ module Schedule
 
     def dispatch(count, chat_ids, logger)
       games = FreeGame.games(count)
-      # chat_ids.each do |chat_id|
-      #   chat_member = TelegramService::BOT.api.get_chat_member(chat_id: chat_id, user_id: chat_id)
-      #   binding.pry
-      # end
 
       chat_ids.each do |chat_id|
         TelegramService::BOT.api.send_message(chat_id: chat_id, text: Template.new(games), parse_mode: 'html')
@@ -93,4 +88,3 @@ module Schedule
     end
   end
 end
-# 370506028 - Ferm[yasha]

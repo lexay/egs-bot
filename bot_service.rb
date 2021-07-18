@@ -11,7 +11,6 @@ module TelegramService
       logger = Logger.new($stdout)
       BOT.run do |current_bot|
         current_bot.listen do |message|
-          # binding.pry
           case message
           when Telegram::Bot::Types::ChatMemberUpdated
             user_status = message.new_chat_member.status
@@ -33,11 +32,9 @@ module TelegramService
 
     def time_left
       date = FreeGame.next_date
-      # binding.pry
       if date.nil? || (date - Time.now).negative?
         return 'Следующая раздача неизвестна!'
       end
-      # binding.pry
       days_in_sec = (date - Time.now).to_i
       days, hours_in_sec = days_in_sec.divmod(60 * 60 * 24)
       hours, minutes_in_sec = hours_in_sec.divmod(60 * 60)

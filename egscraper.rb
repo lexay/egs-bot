@@ -98,7 +98,6 @@ class Parser
         games.map do |game|
           info = {}
           attributes.each do |name|
-            # binding.pry
             info[name.to_sym] = method(name + '_get').call(game)
           end
           info
