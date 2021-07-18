@@ -24,9 +24,8 @@ module Template
     end
 
     def format(date)
-      parsed_date = Time.parse(date)
-      day = parsed_date.strftime('%-d')
-      month_idx = parsed_date.strftime('%m').to_i - 1
+      day = date.strftime('%-d')
+      month_idx = date.strftime('%m').to_i - 1
       month = %w[января февраля марта апреля мая июня июля августа сентября октября ноября декабря][month_idx]
       "#{day} #{month}"
     end
