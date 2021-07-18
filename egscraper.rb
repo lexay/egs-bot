@@ -62,7 +62,7 @@ class Parser
     class << self
       def all
         games = Requests.get(PROMO, content: 'application/json;charset=utf-8')
-        games.deep_find('elements')
+        games.deep_find('elements') unless games.empty?
       end
 
       def current
@@ -78,40 +78,30 @@ class Parser
 
       def run
         promotions = Promotions.current
-        scraped_games = bootstrap(promotions)
-        # binding.pry
+        bootstrap(promotions)
       end
 
       private
 
       def bootstrap(promotions)
-        first_part = first_part_get(promotions)
-        ids = promotions.map { |game| ids_get(game) }
-        uris = game_uris_get(ids)
-        main_games = main_games_get(ids)
-        second_part = second_part_get(main_games)
+        ids = promotions.map { |game| id_get(game) }
+        urls = url_get(ids)
+        main_games = main_game_get(ids)
+        first_part = parse(promotions, %w[start_date end_date pubs_n_devs])
+        second_part = parse(main_games, %w[title full_description short_description])
         first_part.map.with_index do |hash, idx|
-          hash.merge(second_part[idx], uris[idx], timestamp: Time.now)
+          hash.merge(second_part[idx], urls[idx], timestamp: Time.now)
         end
       end
 
-      def first_part_get(promotions)
-        promotions.map do |game|
-          hh = {}
-          %w[start_date end_date pubs_n_devs].each do |name|
-            hh[name.to_sym] = method(name << '_get').call(game)
+      def parse(games, attributes)
+        games.map do |game|
+          info = {}
+          attributes.each do |name|
+            # binding.pry
+            info[name.to_sym] = method(name + '_get').call(game)
           end
-          hh
-        end
-      end
-
-      def second_part_get(main_games)
-        main_games.map do |game|
-          hh = {}
-          %w[title full_description short_description].each do |name|
-            hh[name.to_sym] = method(name << '_get').call(game)
-          end
-          hh
+          info
         end
       end
 
@@ -123,7 +113,7 @@ class Parser
         Time.parse game.deep_find('endDate')
       end
 
-      def ids_get(game)
+      def id_get(game)
         game['productSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
       end
 
@@ -135,7 +125,7 @@ class Parser
         devs.map { |dev_or_pub| dev_or_pub['value'] }.join(' / ')
       end
 
-      def game_info_get(ids)
+      def game_details_get(ids)
         games = []
         ids.each do |id|
           games.push Requests.get(GAME_INFO_RU + id) if id
@@ -144,27 +134,25 @@ class Parser
         games
       end
 
-      def main_games_get(ids)
-        main_games = []
-        games = game_info_get(ids)
-        games.each do |game|
-          game['pages'].each do |product|
-            main_games.push product if product['type'] == 'productHome'
+      def main_game_get(ids)
+        main_games_only = []
+        games_and_addons = game_details_get(ids)
+        games_and_addons.each do |game_or_addon|
+          game_or_addon['pages'].each do |product|
+            main_games_only.push product if product['type'] == 'productHome'
           end
         end
-        main_games
+        main_games_only
       end
 
       def short_description_get(game)
         desc = game.deep_find('shortDescription') || '-'
         sanitize(desc)
-        # Try String partition method for sanitizing
       end
 
       def full_description_get(game)
         desc = game.deep_find('description') || '-'
         sanitize(desc)
-        # Try String partition method for sanitizing
       end
 
       def sanitize(description)
@@ -178,11 +166,9 @@ class Parser
         game.deep_find('navTitle').strip #.compact
       end
 
-      def game_uris_get(ids)
+      def url_get(ids)
         ids.map { |id| { game_uri: PRODUCT + id } }
       end
     end
   end
 end
-
-# Parser::Promotions.run
