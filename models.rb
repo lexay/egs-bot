@@ -2,7 +2,7 @@ require 'sequel'
 require 'pry'
 
 DB = Sequel.connect('sqlite://db/test.db')
-
+Sequel.default_timezone = :utc
 class FreeGame < Sequel::Model
   def self.games(count = 1)
     order_by(:id).last(count)
@@ -18,7 +18,7 @@ class User < Sequel::Model
     all.map(&:chat_id)
   end
 
-  def unsubscribe(chat_id)
+  def self.unsubscribe(chat_id)
     where(chat_id: chat_id).delete
   end
 end
