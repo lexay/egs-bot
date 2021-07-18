@@ -8,15 +8,22 @@ require_relative 'template'
 module Schedule
   class << self
     def plan
-
       Thread.new do
         logger = Logger.new($stdout)
         loop do
           games = parse
-          # binding.pry
-          store(games)
-          # binding.pry
-          dispatch(games.count, logger)
+          if games.empty?
+            logger.info 'Games returned nothing! Skipping...'
+          else
+            store(games)
+            logger.info 'Games have been successfully saved to Database!'
+          end
+          chat_ids = User.chat_ids
+          if chat_ids.empty?
+            logger.info 'No subscribed users! Skipping...'
+          else
+            dispatch(games.count, chat_ids, logger)
+          end
           wait
         end
       end
@@ -41,20 +48,8 @@ module Schedule
       end
     end
 
-    def dispatch(count, logger)
+    def dispatch(count, chat_ids, logger)
       games = FreeGame.games(count)
-      if games.empty?
-        logger.info 'Games returned nothing! Skipping...'
-        return
-      end
-
-      chat_ids = User.chat_ids
-      # binding.pry
-      if chat_ids.empty?
-        logger.info 'No subscribed users! Skipping...'
-        return
-      end
-
       # chat_ids.each do |chat_id|
       #   chat_member = TelegramService::BOT.api.get_chat_member(chat_id: chat_id, user_id: chat_id)
       #   binding.pry
@@ -62,6 +57,7 @@ module Schedule
 
       chat_ids.each do |chat_id|
         TelegramService::BOT.api.send_message(chat_id: chat_id, text: Template.new(games), parse_mode: 'html')
+        logger.info "Games have been dispatched to #{chat_id}!"
 
       # Telegram::Bot::Exceptions::ResponseError
       # Telegram API has returned the error. (ok: "false", error_code: "403",
@@ -71,7 +67,7 @@ module Schedule
         logger.error exception.message
 
         if process(exception)[:error_code] == '403'
-          logger.info 'Invalid user. Unsubscribing...'
+          logger.info "Invalid user(#{chat_id}). Unsubscribing..."
           User.unsubscribe chat_id
         end
 
@@ -89,9 +85,11 @@ module Schedule
 
     def wait
       next_date = FreeGame.next_date
-      # binding.pry
-      next_date = next_date.nil? ? 60 * 60 * 24 : next_date - Time.now
-      sleep next_date
+      day = 60 * 60 * 24
+      return sleep day if next_date.nil?
+
+      next_date -= Time.now
+      sleep next_date.negative? ? day : next_date
     end
   end
 end
