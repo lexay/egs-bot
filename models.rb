@@ -1,5 +1,4 @@
 require 'sequel'
-require 'pry'
 
 DB = Sequel.connect('sqlite://db/test.db')
 Sequel.default_timezone = :utc

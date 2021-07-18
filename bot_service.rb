@@ -1,6 +1,5 @@
 require 'dotenv/load'
 require 'logger'
-require 'pry'
 require 'telegram/bot'
 require_relative 'models'
 
