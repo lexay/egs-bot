@@ -1,33 +1,48 @@
 require 'dotenv/load'
+require 'logger'
+require 'pry'
 require 'telegram/bot'
-require_relative 'bot_commands'
+require_relative 'models'
 
-module TeleBot
+module TelegramService
+  BOT = Telegram::Bot::Client.new(ENV['T_TOKEN'])
   class << self
     def listen
-      Telegram::Bot::Client.run(ENV['T_TOKEN']) do |bot|
-        bot.listen do |message|
-          mini_logger(message)
-          case message.text
-          when '/now'
-            bot.api.send_message(chat_id: message.chat.id, text: BotCommand.now, parse_mode: 'HTML')
-          when '/next'
-            bot.api.send_message(chat_id: message.chat.id, text: BotCommand.next, parse_mode: 'HTML')
-          when '/help'
-            bot.api.send_message(chat_id: message.chat.id, text: BotCommand.help, parse_mode: 'HTML')
-          else
-            bot.api.send_message(chat_id: message.chat.id, text: BotCommand.message_missing(message))
-            bot.api.send_message(chat_id: message.chat.id, text: BotCommand.help, parse_mode: 'HTML')
+      logger = Logger.new($stdout)
+      BOT.run do |current_bot|
+        current_bot.listen do |message|
+          case message
+          when Telegram::Bot::Types::ChatMemberUpdated
+            user_status = message.new_chat_member.status
+            # BOT.api.get_chat_member(chat_id: message.chat.id, user_id: message.from.id)
+            case user_status
+            when 'member'
+              User.new(name: message.chat.username, chat_id: message.chat.id, timestamp: Time.now).save
+              logger.info "User: #{message.from.username}(#{message.chat.id}) is subscribed!"
+            when 'kicked'
+              User.unsubscribe message.chat.id
+              logger.info "User: #{message.from.username}(#{message.chat.id}) is unsubscribed!"
+            end
+          when Telegram::Bot::Types::Message
+            BOT.api.send_message(chat_id: message.chat.id, text: time_left) if message.text == '/start'
           end
         end
       end
     end
 
-    def mini_logger(current_message)
-      puts "Username: #{current_message.from.username}, Command: #{current_message.text}"
-      puts "Date: #{Time.at(current_message.date)}"
+    def time_left
+      date = FreeGame.next_date
+      if date.nil? || (date - Time.now).negative?
+        return 'Следующая раздача неизвестна!'
+      end
+      days_in_sec = (date - Time.now).to_i
+      days, hours_in_sec = days_in_sec.divmod(60 * 60 * 24)
+      hours, minutes_in_sec = hours_in_sec.divmod(60 * 60)
+      minutes, seconds = minutes_in_sec.divmod(60)
+      "Вы подписаны!\n" \
+      "Следующая раздача через: #{days} дн.: #{hours} ч.: #{minutes} м.: #{seconds} с."
     end
   end
 end
 
-TeleBot.listen
+# TeleBot.listen

@@ -35,7 +35,7 @@ class Parser
           http.request(request)
         end
 
-        JSON.parse(response.body)
+        response.code == '200' ? JSON.parse(response.body) : []
       end
 
       def post(uri_string, **options)
@@ -52,7 +52,7 @@ class Parser
           http.request(request)
         end
 
-        JSON.parse(response.body)
+        response.code == '200' ? JSON.parse(response.body) : []
       end
     end
   end
@@ -61,12 +61,18 @@ class Parser
     class << self
       def all
         games = Requests.get(PROMO, content: 'application/json;charset=utf-8')
-        games.deep_find('elements')
+        games.deep_find('elements') unless games.empty?
       end
 
       def current
         free_games = Promotions.all
-        free_games.select { |game| game unless game['promotions'].nil? }
+        free_games.select do |game|
+          current_promotion = game.dig('promotions', 'promotionalOffers')
+          next if current_promotion.nil?
+          next if current_promotion.empty?
+
+          game
+        end
       end
 
       def run
@@ -77,52 +83,36 @@ class Parser
       private
 
       def bootstrap(promotions)
-        first_part = first_part_get(promotions)
-        ids = promotions.map { |game| ids_get(game) }
-        ratings = ratings_get(ids)
-        uris = game_uris_get(ids)
-        main_games = main_games_get(ids)
-        second_part = second_part_get(main_games)
+        ids = promotions.map { |game| id_get(game) }
+        urls = url_get(ids)
+        main_games = main_game_get(ids)
+        first_part = parse(promotions, %w[start_date end_date pubs_n_devs])
+        second_part = parse(main_games, %w[title full_description short_description])
         first_part.map.with_index do |hash, idx|
-          hash.merge(second_part[idx], ratings[idx], uris[idx], id: idx, timestamp: Time.now.to_s)
+          hash.merge(second_part[idx], urls[idx], timestamp: Time.now)
         end
       end
 
-      def first_part_get(promotions)
-        promotions.map do |game|
-          hh = {}
-          %w[start_date end_date pubs_n_devs price available].each do |name|
-            hh[name.to_sym] = method(name << '_get').call(game)
+      def parse(games, attributes)
+        games.map do |game|
+          info = {}
+          attributes.each do |name|
+            info[name.to_sym] = method(name + '_get').call(game)
           end
-          hh
-        end
-      end
-
-      def second_part_get(main_games)
-        main_games.map do |game|
-          hh = {}
-          %w[title full_description short_description hardware videos languages].each do |name|
-            hh[name.to_sym] = method(name << '_get').call(game)
-          end
-          hh
+          info
         end
       end
 
       def start_date_get(game)
-        game.deep_find('startDate')
+        Time.parse game.deep_find('startDate')
       end
 
       def end_date_get(game)
-        game.deep_find('endDate')
+        Time.parse game.deep_find('endDate')
       end
 
-      def ids_get(game)
-        game['productSlug'].chomp('/home')[/[-[:alnum:]]+/]
-      end
-
-      def price_get(game)
-        original_price = game.deep_find('originalPrice')
-        original_price.positive? ? original_price / 100 : 'Пока неизвестна'
+      def id_get(game)
+        game['productSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
       end
 
       def pubs_n_devs_get(game)
@@ -133,26 +123,7 @@ class Parser
         devs.map { |dev_or_pub| dev_or_pub['value'] }.join(' / ')
       end
 
-      def available_get(game)
-        Time.parse(start_date_get(game)) - Time.now > 0 ? 'next' : 'now'
-      end
-
-      def ratings_get(ids)
-        ratings = []
-        ids.each do |id|
-          query = { query: RATINGS, variables: { sku: "EPIC_#{id}" } }.to_json
-          request = Requests.post(GQL, body: query, content: 'application/json;charset=utf-8')
-          score = (request.deep_find('openCriticScore') || '-').to_s
-          percent = request.deep_find('percentRecommended')
-          percent = percent.nil? ? '-' : percent.to_s << '%'
-
-          ratings.push({ rating: score << '/' << percent })
-          sleep rand(0.75..1.5)
-        end
-        ratings
-      end
-
-      def game_info_get(ids)
+      def game_details_get(ids)
         games = []
         ids.each do |id|
           games.push Requests.get(GAME_INFO_RU + id) if id
@@ -161,34 +132,15 @@ class Parser
         games
       end
 
-      def main_games_get(ids)
-        main_games = []
-        games = game_info_get(ids)
-        games.each do |game|
-          game['pages'].each do |product|
-            main_games.push product if product['type'] == 'productHome'
+      def main_game_get(ids)
+        main_games_only = []
+        games_and_addons = game_details_get(ids)
+        games_and_addons.each do |game_or_addon|
+          game_or_addon['pages'].each do |product|
+            main_games_only.push product if product['type'] == 'productHome'
           end
         end
-        main_games
-      end
-
-      def refs_get(game)
-        refs = game.deep_find('recipes')
-        refs.nil? ? (return refs) : refs_fmt = YAML.safe_load(refs)
-
-        en_refs = refs_fmt['en-US']
-        webm = en_refs.select { |ref| ref['recipe'] =~ /video-webm/ }.first
-        webm['mediaRefId']
-      end
-
-      def videos_get(game)
-        media_ref = refs_get(game)
-        return '-' if media_ref.nil?
-
-        query = { query: MEDIA, variables: { mediaRefId: media_ref } }.to_json
-        request = Requests.post(GQL, body: query, content: 'application/json;charset=utf-8')
-        sleep rand(0.75..1.5)
-        request.deep_find('url')
+        main_games_only
       end
 
       def short_description_get(game)
@@ -205,54 +157,16 @@ class Parser
         description.delete! '*'
         description.delete! '#'
         pattern = /!?\[.+\)/
-        description.partition(pattern).delete_if { |str| str =~ pattern }.join
-      end
-
-      def images_get(game)
-        images = []
-        cover_image = game.deep_find('_images_').find_all { |image| /\.png$/.match(image) }.first
-        images.push cover_image
-        images
-      end
-
-      def languages_get(game)
-        game.deep_find('languages').join
-      end
-
-      def hardware_get(game)
-        requirements_fmt = String.new
-        os_types = game.deep_find_all('systemType')
-        details = game.deep_find_all('details')
-        details.each_with_index do |os, idx|
-          requirements_fmt << os_types[idx] << "\n"
-          os.each do |spec|
-            title = spec['title']
-            min = spec['minimum']
-            rec = spec['recommended']
-
-            if min == rec
-              requirements_fmt << (title << ': ' << rec) << "\n"
-            elsif min && (!rec || rec.empty?)
-              requirements_fmt << (title << ': ' << min) << "\n"
-            elsif rec && (!min || min.empty?)
-              requirements_fmt << (title << ': ' << rec) << "\n"
-            else
-              requirements_fmt << (title << ': ' << min << ' | ' << rec) << "\n"
-            end
-          end
-          requirements_fmt << "\n"
-        end
-        requirements_fmt #.split("\n\n")
+        description.partition(pattern).delete_if { |str| str =~ pattern }.join.strip
       end
 
       def title_get(game)
         game.deep_find('navTitle').strip
       end
 
-      def game_uris_get(ids)
+      def url_get(ids)
         ids.map { |id| { game_uri: PRODUCT + id } }
       end
     end
   end
 end
-
