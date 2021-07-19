@@ -4,7 +4,7 @@ Sequel.migration do
       primary_key :id
       String :title, :size=>255
       String :full_description, text: true
-      String :short_description, :size=>255
+      String :short_description, text: true
       String :pubs_n_devs, :size=>255
       String :game_uri, :size=>255
       DateTime :start_date
