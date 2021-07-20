@@ -1,1 +1,1 @@
-start.rb
+worker: bundle exec ruby start.rb
