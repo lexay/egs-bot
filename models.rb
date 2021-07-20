@@ -1,6 +1,6 @@
 require 'sequel'
 
-DB = Sequel.connect(ENV['DB_PATH'])
+DB = Sequel.connect(ENV['URL'])
 Sequel.default_timezone = :utc
 class FreeGame < Sequel::Model
   def self.games(count = 1)
