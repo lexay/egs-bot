@@ -1,6 +1,8 @@
+require 'dotenv/load'
+require 'pry'
 require 'sequel'
 
-DB = Sequel.connect(ENV['DATABASE_URL'])
+DB = Sequel.connect(ENV['URL'])
 Sequel.default_timezone = :utc
 class FreeGame < Sequel::Model
   def self.games(count = 1)
@@ -8,7 +10,8 @@ class FreeGame < Sequel::Model
   end
 
   def self.next_date
-    games.last.end_date
+    # binding.pry
+    games.empty? ? nil : games.last.end_date
   end
 end
 
