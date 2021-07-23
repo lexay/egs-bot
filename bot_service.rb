@@ -3,7 +3,7 @@ require 'telegram/bot'
 require_relative 'models'
 
 module TelegramService
-  BOT = BOT || Telegram::Bot::Client.new(ENV['T_TOKEN'])
+  BOT ||= Telegram::Bot::Client.new(ENV['T_TOKEN'])
   class << self
     def listen
       logger = Logger.new($stdout)
