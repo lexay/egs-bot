@@ -1,4 +1,3 @@
-require 'dotenv/load'
 require 'logger'
 require 'telegram/bot'
 require_relative 'models'
