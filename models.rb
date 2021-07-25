@@ -8,7 +8,7 @@ class FreeGame < Sequel::Model
   end
 
   def self.next_date
-    games.last.end_date
+    games.empty? ? nil : games.last.end_date
   end
 end
 
