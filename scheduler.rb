@@ -22,9 +22,6 @@ class Schedule
           wait(next_date)
         else
           serve_games_to_users
-          # serve_games
-          # serve_users
-          # binding.pry
           wait(FreeGame.next_date)
         end
       end
@@ -44,21 +41,9 @@ class Schedule
     dispatch(games.count, chat_ids)
   end
 
-  # def serve_games
-  #   @games = parse_games
-  #   binding.pry
-  #   if games.empty?
-  #     logger.info 'Games returned nothing! Skipping...'
-  #   else
-  #     # binding.pry
-  #     store(games)
-  #     logger.info 'Games have been successfully saved to Database!'
-  #   end
-  # end
-
   def parse_games
     5.times do
-      promotions = Parser::Promotions.run
+      promotions = Promotion::Parser.run
       return promotions unless promotions.empty?
 
       wait
@@ -71,16 +56,6 @@ class Schedule
       FreeGame.new(game).save
     end
   end
-
-  # def serve_users
-  #   # binding.pry
-  #   chat_ids = User.chat_ids
-  #   if chat_ids.empty?
-  #     logger.info 'No subscribed users! Skipping...'
-  #   elsif !games.empty?
-  #     dispatch(games.count, chat_ids)
-  #   end
-  # end
 
   def dispatch(count, chat_ids)
     games = FreeGame.games(count)
