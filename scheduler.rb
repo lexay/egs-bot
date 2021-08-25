@@ -41,7 +41,7 @@ class Schedule
 
   def parse_games
     5.times do
-      promotions = Parser::Promotions.run
+      promotions = Promotion::Parser.run
       return promotions unless promotions.empty?
 
       wait

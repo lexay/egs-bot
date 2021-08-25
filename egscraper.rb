@@ -13,14 +13,14 @@ class Array
   include Hashie::Extensions::DeepFind
 end
 
-class Parser
+class Promotion
   PROMO = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=RU&allowCountries=RU'.freeze
   GQL = 'https://www.epicgames.com/graphql'.freeze
   GAME_INFO_RU = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
   GAME_INFO = 'https://store-content.ak.epicgames.com/api/en-US/content/products/'.freeze
   PRODUCT = 'https://www.epicgames.com/store/ru/product/'.freeze
 
-  class Requests
+  class Request
     class << self
       def get(uri_string, **options)
         uri = URI.parse(uri_string)
@@ -57,58 +57,60 @@ class Parser
     end
   end
 
-  class Promotions
+  class Parser
     class << self
-      def all
-        games = Requests.get(PROMO, content: 'application/json;charset=utf-8')
+      def run
+        bootstrap current_free_games
+      end
+
+      private
+
+      def all_promotions_get
+        games = Request.get(PROMO, content: 'application/json;charset=utf-8')
         games.deep_find('elements') unless games.empty?
       end
 
-      def current
-        free_games = Promotions.all
-        free_games.select do |game|
-          current_promotion = game.dig('promotions', 'promotionalOffers')
-          next if current_promotion.nil?
-          next if current_promotion.empty?
+      def current_free_games
+        promoted_games = all_promotions_get
+        promoted_games.select do |game|
+          free_game = game.dig('promotions', 'promotionalOffers')
+          next if free_game.nil?
+          next if free_game.empty?
 
           game
         end
       end
 
-      def run
-        promotions = Promotions.current
-        bootstrap(promotions)
-      end
-
-      private
-
-      def bootstrap(promotions)
-        ids = promotions.map { |game| id_get(game) }
+      def bootstrap(games)
+        ids = games.map { |game| id_get(game) }
         urls = url_get(ids)
         main_games = main_game_get(ids)
-        first_part = parse(promotions, %w[start_date end_date pubs_n_devs])
-        second_part = parse(main_games, %w[title full_description short_description])
-        first_part.map.with_index do |hash, idx|
-          hash.merge(second_part[idx], urls[idx], timestamp: Time.now)
+        parse(games, main_games, urls)
+      end
+
+      def parse(games, main_games, urls)
+        parsed = []
+
+        count = games.count
+
+        0.upto(count - 1) do |idx|
+          parsed.push(
+            { start_date: date_get(games[idx], 'startDate'),
+              end_date: date_get(games[idx], 'endDate'),
+              pubs_n_devs: pubs_n_devs_get(games[idx]),
+              title: title_get(main_games[idx]),
+              short_description: description_get(main_games[idx], 'shortDescription'),
+              full_description: description_get(main_games[idx], 'full_description'),
+              game_uri: urls[idx],
+              timestamp: Time.now }
+          )
         end
+        parsed
+        binding.pry
       end
 
-      def parse(games, attributes)
-        games.map do |game|
-          info = {}
-          attributes.each do |name|
-            info[name.to_sym] = method(name + '_get').call(game)
-          end
-          info
-        end
-      end
-
-      def start_date_get(game)
-        Time.parse game.deep_find('startDate')
-      end
-
-      def end_date_get(game)
-        Time.parse game.deep_find('endDate')
+      def date_get(game, date)
+        Time.parse game.deep_find(date)
       end
 
       def id_get(game)
@@ -126,7 +128,7 @@ class Parser
       def game_details_get(ids)
         games = []
         ids.each do |id|
-          games.push Requests.get(GAME_INFO_RU + id) if id
+          games.push Request.get(GAME_INFO_RU + id) if id
           sleep rand(0.75..1.5)
         end
         games
@@ -143,13 +145,8 @@ class Parser
         main_games_only
       end
 
-      def short_description_get(game)
-        desc = game.deep_find('shortDescription') || '-'
-        sanitize(desc)
-      end
-
-      def full_description_get(game)
-        desc = game.deep_find('description') || '-'
+      def description_get(game, description)
+        desc = game.deep_find(description) || '-'
         sanitize(desc)
       end
 
@@ -165,8 +162,10 @@ class Parser
       end
 
       def url_get(ids)
-        ids.map { |id| { game_uri: PRODUCT + id } }
+        ids.map { |id| PRODUCT + id }
       end
     end
   end
 end
+
+Promotion::Parser.run
