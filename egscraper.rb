@@ -106,7 +106,6 @@ class Promotion
           )
         end
         parsed
-        binding.pry
       end
 
       def date_get(game, date)
@@ -167,5 +166,3 @@ class Promotion
     end
   end
 end
-
-Promotion::Parser.run
