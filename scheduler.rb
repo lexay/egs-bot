@@ -5,11 +5,10 @@ require_relative 'egscraper'
 require_relative 'template'
 
 class Schedule
-  attr_reader :logger, :games
+  attr_reader :logger
 
   def initialize
     @logger = Logger.new($stdout)
-    @games = []
   end
 
   def plan
@@ -30,7 +29,7 @@ class Schedule
   private
 
   def serve_games_to_users
-    @games = parse_games
+    games = parse_games
     chat_ids = User.chat_ids
     return logger.info 'Games returned nothing! Skipping...' if games.empty?
     return logger.info 'No subscribed users! Skipping...' if chat_ids.empty?
