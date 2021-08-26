@@ -3,8 +3,8 @@ require 'time'
 module Template
   class << self
     def new(games)
-      start_date, end_date = games.first.values_at(:start_date, :end_date)
-      text = "Текущая раздача от ЕГС с #{format start_date} по #{format end_date}:\n"
+      game = games.first
+      text = "Текущая раздача от ЕГС с #{format game.start_date} по #{format game.end_date}:\n"
 
       games.each do |game|
         message = <<~MESSAGE
