@@ -3,12 +3,11 @@ require 'time'
 module Template
   class << self
     def new(games)
-      text = String.new
+      start_date, end_date = games.first.values_at(:start_date, :end_date)
+      text = "Текущая раздача от ЕГС с #{format start_date} по #{format end_date}:\n"
+
       games.each do |game|
-
         message = <<~MESSAGE
-          Текущая раздача от ЕГС с #{format game.start_date} по #{format game.end_date}:
-
           <strong>Название:</strong> <a href='#{game.game_uri}'>#{game.title}</a>
 
           <strong>Издатель / Разработчик:</strong> #{game.pubs_n_devs}
