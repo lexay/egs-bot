@@ -3,8 +3,8 @@ require 'time'
 module Template
   class << self
     def new(games)
-      game = games.first
-      text = "Текущая раздача от ЕГС с #{format game.start_date} по #{format game.end_date}:\n"
+      a_game = games.first
+      text = "Текущая раздача от ЕГС с #{format a_game.start_date} по #{format a_game.end_date}:\n"
 
       games.each do |game|
         message = <<~MESSAGE
