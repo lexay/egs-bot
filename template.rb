@@ -4,7 +4,7 @@ module Template
   class << self
     def new(games)
       a_game = games.first
-      text = "Текущая раздача от ЕГС с #{format a_game.start_date} по #{format a_game.end_date}:\n"
+      text = "Текущая раздача от ЕГС с #{format a_game.start_date} по #{format a_game.end_date}:\n\n"
 
       games.each do |game|
         message = <<~MESSAGE
@@ -15,7 +15,7 @@ module Template
           <strong>Описание:</strong>
           #{game.short_description.length < 10 ? game.full_description : game.short_description}
           <a href='#{game.game_uri}'>...</a>
-          \n
+
         MESSAGE
         text << message
       end
