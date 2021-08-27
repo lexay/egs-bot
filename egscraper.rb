@@ -60,7 +60,7 @@ class Promotion
   class Parser
     class << self
       def run
-        bootstrap current_free_games
+        parse current_free_games
       end
 
       private
@@ -81,20 +81,20 @@ class Promotion
         end
       end
 
-      def bootstrap(games)
+      def parse(games)
         ids = games.map { |game| id_get(game) }
         urls = url_get(ids)
         main_games = main_game_get(ids)
-        parse(games, main_games, urls)
+        bootstrap(games, main_games, urls)
       end
 
-      def parse(games, main_games, urls)
-        parsed = []
+      def bootstrap(games, main_games, urls)
+        bootstraped = []
 
         count = games.count
 
         0.upto(count - 1) do |idx|
-          parsed.push(
+          bootstraped.push(
             { start_date: date_get(games[idx], 'startDate'),
               end_date: date_get(games[idx], 'endDate'),
               pubs_n_devs: pubs_n_devs_get(games[idx]),
@@ -105,7 +105,7 @@ class Promotion
               timestamp: Time.now }
           )
         end
-        parsed
+        bootstraped
       end
 
       def date_get(game, date)
