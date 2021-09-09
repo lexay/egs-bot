@@ -71,13 +71,13 @@ class Promotion
       end
 
       def current_free_games
-        promoted_games = all_promotions_get
-        promoted_games.select do |game|
-          free_game = game.dig('promotions', 'promotionalOffers')
-          next if free_game.nil?
-          next if free_game.empty?
+        all_promotions = all_promotions_get
+        all_promotions.select do |promotion|
+          offered_game = promotion.dig('promotions', 'promotionalOffers')
+          next unless current?(offered_game) 
+          next unless free?(offered_game)
 
-          game
+          promotion
         end
       end
 
@@ -106,6 +106,14 @@ class Promotion
           )
         end
         bootstraped
+      end
+
+      def current?(game)
+        game.nil? || game.empty? ? false : true
+      end
+
+      def free?(game)
+        game.deep_find('discountPercentage').zero?
       end
 
       def date_get(game, date)
