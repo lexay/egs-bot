@@ -4,9 +4,10 @@ module Template
   class << self
     def new(games)
       a_game = games.first
-      text = "Текущая раздача от ЕГС с #{format a_game.start_date} по #{format a_game.end_date}:\n\n"
+      text = "Текущая раздача от ЕГС с #{stringify a_game.start_date} по #{stringify a_game.end_date}:\n\n"
 
-      games.each do |game|
+      games.each_with_index do |game, idx|
+        game_idx = format('%i. ', idx + 1)
         message = <<~MESSAGE
           <strong>Название:</strong> <a href='#{game.game_uri}'>#{game.title}</a>
 
@@ -17,15 +18,15 @@ module Template
           <a href='#{game.game_uri}'>...</a>
 
         MESSAGE
-        text << message
+        text << game_idx << message
       end
       text
     end
 
-    def format(date)
+    def stringify(date)
       day = date.strftime('%-d')
-      month_idx = date.strftime('%m').to_i - 1
-      month = %w[января февраля марта апреля мая июня июля августа сентября октября ноября декабря][month_idx]
+      month_idx = date.strftime('%m').to_i
+      month = %w[января февраля марта апреля мая июня июля августа сентября октября ноября декабря][month_idx - 1]
       "#{day} #{month}"
     end
   end
