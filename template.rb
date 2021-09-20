@@ -6,8 +6,10 @@ module Template
       a_game = games.first
       text = "Текущая раздача от ЕГС с #{stringify a_game.start_date} по #{stringify a_game.end_date}:\n\n"
 
+      show_idx = ->(idx) { format('%i. ', idx + 1) }
+      show_no_idx = proc { '' }
+      game_idx = games.count > 1 ? show_idx : show_no_idx
       games.each_with_index do |game, idx|
-        game_idx = format('%i. ', idx + 1)
         message = <<~MESSAGE
           <strong>Название:</strong> <a href='#{game.game_uri}'>#{game.title}</a>
 
@@ -18,7 +20,7 @@ module Template
           <a href='#{game.game_uri}'>...</a>
 
         MESSAGE
-        text << game_idx << message
+        text << game_idx.call(idx) << message
       end
       text
     end
