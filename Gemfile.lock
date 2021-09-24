@@ -31,8 +31,17 @@ GEM
     faraday-patron (1.0.0)
     hashie (4.1.0)
     ice_nine (0.11.2)
+    io-wait (0.1.0)
+    json (2.5.1)
+    logger (1.4.3)
     method_source (1.0.0)
     multipart-post (2.1.1)
+    net-http (0.1.1)
+      net-protocol
+      uri
+    net-protocol (0.1.1)
+      io-wait
+      timeout
     pg (1.2.3)
     pry (0.14.1)
       coderay (~> 1.1)
@@ -44,10 +53,14 @@ GEM
       faraday
       virtus (~> 2.0)
     thread_safe (0.3.6)
+    time (0.1.0)
+    timeout (0.1.1)
+    uri (0.10.1)
     virtus (2.0.0)
       axiom-types (~> 0.1)
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
+    yaml (0.1.1)
 
 PLATFORMS
   ruby
@@ -55,10 +68,15 @@ PLATFORMS
 DEPENDENCIES
   dotenv
   hashie
+  json
+  logger
+  net-http
   pg
   pry
   sequel
   telegram-bot-ruby
+  time
+  yaml
 
 RUBY VERSION
    ruby 2.7.3p183
