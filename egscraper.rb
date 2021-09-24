@@ -1,8 +1,3 @@
-require 'hashie'
-require 'json'
-require 'net/http'
-require 'time'
-require 'yaml'
 require_relative 'queries'
 
 class Hash

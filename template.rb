@@ -1,5 +1,3 @@
-require 'time'
-
 module Template
   class << self
     def new(games)
