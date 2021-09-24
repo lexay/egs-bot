@@ -1,5 +1,3 @@
-require 'logger'
-require 'telegram/bot'
 require_relative 'models'
 
 module TelegramService

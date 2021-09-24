@@ -1,7 +1,6 @@
-require 'logger'
 require_relative 'bot_service'
-require_relative 'models'
 require_relative 'egscraper'
+require_relative 'models'
 require_relative 'template'
 
 class Schedule
