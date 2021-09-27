@@ -5,16 +5,14 @@ require_relative 'template'
 module EGS
   class Schedule
     def plan
-      Thread.new do
-        loop do
-          next_date = EGS::Models::FreeGame.next_date
-          if behind?(next_date)
-            EGS::LOG.info 'Skipping to the next release!'
-            wait(next_date)
-          else
-            serve_games_to_users
-            wait(EGS::Models::FreeGame.next_date)
-          end
+      loop do
+        next_date = EGS::Models::FreeGame.next_date
+        if behind?(next_date)
+          EGS::LOG.info 'Skipping to the next release!'
+          wait(next_date)
+        else
+          serve_games_to_users
+          wait(EGS::Models::FreeGame.next_date)
         end
       end
     end
