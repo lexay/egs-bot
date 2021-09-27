@@ -15,6 +15,6 @@ end
 require_relative 'bot_service'
 require_relative 'scheduler'
 
-thread1 = Thread.new { Schedule.new.plan }
-thread2 = Thread.new { TelegramService.new.listen }
+thread1 = Thread.new { EGS::Schedule.new.plan }
+thread2 = Thread.new { EGS::TelegramService.new.listen }
 [thread1, thread2].each(&:join)
