@@ -4,11 +4,10 @@ Bundler.setup(:default)
 Bundler.require(:default)
 
 module EGS
-  begin
-    BOT ||= Telegram::Bot::Client.new(ENV['T_TOKEN'])
-  rescue Telegram::Bot::Exceptions::ResponseError => e
-    puts e.message
-    sleep 5
+  BOT ||= begin
+    Telegram::Bot::Client.new(ENV['T_TOKEN'])
+  rescue Telegram::Bot::Exceptions::ResponseError
+    sleep 1
     retry
   end
   LOG = Logger.new($stdout)

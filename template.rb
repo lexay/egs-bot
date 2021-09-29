@@ -1,6 +1,6 @@
 module EGS
   module Template
-    def new(games)
+    def self.new(games)
       a_game = games.first
       text = "Текущая раздача от ЕГС с #{stringify a_game.start_date} по #{stringify a_game.end_date}:\n\n"
 
@@ -23,7 +23,7 @@ module EGS
       text
     end
 
-    def stringify(date)
+    def self.stringify(date)
       day = date.strftime('%-d')
       month_idx = date.strftime('%m').to_i
       month = %w[января февраля марта апреля мая июня июля августа сентября октября ноября декабря][month_idx - 1]
