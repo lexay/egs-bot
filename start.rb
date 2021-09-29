@@ -4,8 +4,15 @@ Bundler.setup(:default)
 Bundler.require(:default)
 
 module EGS
-  BOT ||= Telegram::Bot::Client.new(ENV['T_TOKEN'])
+  begin
+    BOT ||= Telegram::Bot::Client.new(ENV['T_TOKEN'])
+  rescue Telegram::Bot::Exceptions::ResponseError => e
+    puts e.message
+    sleep 5
+    retry
+  end
   LOG = Logger.new($stdout)
+
   module Models
     DB = Sequel.connect(ENV['DATABASE_URL'])
     Sequel.default_timezone = :utc
