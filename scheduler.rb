@@ -6,14 +6,8 @@ module EGS
   class Schedule
     def plan
       loop do
-        next_date = EGS::Models::FreeGame.next_date
-        if behind?(next_date)
-          EGS::LOG.info 'Skipping to the next release!'
-          wait(next_date)
-        else
-          serve_games_to_users
-          wait(EGS::Models::FreeGame.next_date)
-        end
+        release_date_ahead? ? EGS::LOG.info('Skipping to the next release!') : serve_games_to_users
+        wait 'next_release'
       end
     end
 
@@ -35,7 +29,7 @@ module EGS
         promotions = EGS::Promotion::Parser.run
         return promotions unless promotions.empty?
 
-        wait
+        wait '5 mins'
       end
       []
     end
@@ -77,22 +71,23 @@ module EGS
         .transform_keys(&:to_sym)
     end
 
-    def wait(date = nil)
+    def wait(date)
       that_much = case date
-                  when nil
+                  when '5 mins'
                     60 * 5
                   when 'day'
                     60 * 60 * 24
-                  when Time
-                    date - Time.now
+                  when 'next_release'
+                    EGS::Models::FreeGame.next_date - Time.now
                   end
       sleep that_much
     end
 
-    def behind?(date)
-      return false if date.nil?
+    def release_date_ahead?
+      next_release = EGS::Models::FreeGame.next_date
+      return false if next_release.nil?
 
-      (date - Time.now).positive?
+      (next_release - Time.now).positive?
     end
   end
 end
