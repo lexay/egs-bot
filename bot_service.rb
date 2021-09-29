@@ -12,10 +12,10 @@ module EGS
             case user_status
             when 'member'
               EGS::Models::User.new(name: message.chat.username, chat_id: message.chat.id, timestamp: Time.now).save
-              logger.info "User: #{message.from.username}(#{message.chat.id}) is subscribed!"
+              EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is subscribed!"
             when 'kicked'
               EGS::Models::User.unsubscribe message.chat.id
-              logger.info "User: #{message.from.username}(#{message.chat.id}) is unsubscribed!"
+              EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is unsubscribed!"
             end
           when Telegram::Bot::Types::Message
             EGS::BOT.api.send_message(chat_id: message.chat.id, text: time_left) if message.text == '/start'
