@@ -1,10 +1,9 @@
 require_relative 'queries'
 
-class Hash
+class GameHash < Hash
   include Hashie::Extensions::DeepFind
 end
-
-class Array
+class GameArray < Array
   include Hashie::Extensions::DeepFind
 end
 
@@ -63,7 +62,7 @@ module EGS
 
         def all_promotions_get
           games = Request.get(PROMO, content: 'application/json;charset=utf-8')
-          games.deep_find('elements') unless games.empty?
+          GameHash[games].deep_find('elements') unless games.empty?
         end
 
         def current_free_games
@@ -109,11 +108,11 @@ module EGS
         end
 
         def free?(game)
-          game.deep_find('discountPercentage').zero?
+          GameArray.new(game).deep_find('discountPercentage').zero?
         end
 
         def date_get(game, date)
-          Time.parse game.deep_find(date)
+          Time.parse GameHash[game].deep_find(date)
         end
 
         def id_get(game)
@@ -149,7 +148,7 @@ module EGS
         end
 
         def description_get(game, description)
-          desc = game.deep_find(description) || '-'
+          desc = GameHash[game].deep_find(description) || '-'
           sanitize(desc)
         end
 
@@ -161,7 +160,7 @@ module EGS
         end
 
         def title_get(game)
-          game.deep_find('navTitle').strip
+          GameHash[game].deep_find('navTitle').strip
         end
 
         def url_get(ids)
