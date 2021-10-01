@@ -3,8 +3,8 @@ require_relative 'models'
 module EGS
   class TelegramService
     def listen
-      EGS::BOT.run do |current_bot|
-        current_bot.listen do |message|
+      Thread.new do
+        EGS::BOT.listen do |message|
           case message
           when Telegram::Bot::Types::ChatMemberUpdated
             user_status = message.new_chat_member.status

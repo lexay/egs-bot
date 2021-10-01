@@ -4,12 +4,7 @@ Bundler.setup(:default)
 Bundler.require(:default)
 
 module EGS
-  BOT ||= begin
-    Telegram::Bot::Client.new(ENV['T_TOKEN'])
-  rescue Telegram::Bot::Exceptions::ResponseError
-    sleep 1
-    retry
-  end
+  BOT = Telegram::Bot::Client.new(ENV['T_TOKEN'])
   LOG = Logger.new($stdout)
 
   module Models
@@ -21,6 +16,5 @@ end
 require_relative 'bot_service'
 require_relative 'scheduler'
 
-thread1 = Thread.new { EGS::Schedule.new.plan }
-thread2 = Thread.new { EGS::TelegramService.new.listen }
-[thread1, thread2].each(&:join)
+EGS::TelegramService.new.listen
+EGS::Schedule.new.plan
