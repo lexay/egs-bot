@@ -78,16 +78,19 @@ module EGS
                   when 'day'
                     60 * 60 * 24
                   when 'next_release'
-                    EGS::Models::FreeGame.next_date - Time.now
+                    time_to_next_release
                   end
       sleep that_much
     end
 
     def release_date_ahead?
-      next_release = EGS::Models::FreeGame.next_date
-      return false if next_release.nil?
+      time_to_next_release.positive?
+    rescue NoMethodError
+      false
+    end
 
-      (next_release - Time.now).positive?
+    def time_to_next_release
+      EGS::Models::FreeGame.next_date - Time.now
     end
   end
 end
