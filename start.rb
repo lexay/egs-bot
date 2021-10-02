@@ -4,7 +4,7 @@ Bundler.setup(:default)
 Bundler.require(:default)
 
 module EGS
-  BOT = Telegram::Bot::Client.new(ENV['T_TOKEN'])
+  BotClient = Telegram::Bot::Client.new(ENV['T_TOKEN'])
   LOG = Logger.new($stdout)
 
   module Models

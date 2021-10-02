@@ -44,7 +44,7 @@ module EGS
       games = EGS::Models::FreeGame.games(count)
 
       chat_ids.each do |chat_id|
-        EGS::BOT.api.send_message(chat_id: chat_id, text: EGS::Template.new(games), parse_mode: 'html')
+        EGS::BotClient.api.send_message(chat_id: chat_id, text: EGS::Template.new(games), parse_mode: 'html')
         EGS::LOG.info "Games have been dispatched to #{chat_id}!"
 
       # Telegram::Bot::Exceptions::ResponseError
