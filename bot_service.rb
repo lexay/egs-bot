@@ -1,7 +1,10 @@
 require_relative 'models'
+require_relative 'time_helper'
 
 module EGS
   class TelegramService
+    include TimeHelper
+
     def listen
       Thread.new do
         EGS::BotClient.run do |bot|
@@ -27,11 +30,9 @@ module EGS
     end
 
     def time_left
-      date = EGS::Models::FreeGame.next_date
-      if date.nil? || (date - Time.now).negative?
-        return 'Следующая раздача неизвестна!'
-      end
-      days_in_sec = (date - Time.now).to_i
+      return 'Следующая раздача неизвестна!' unless release_date_ahead?
+
+      days_in_sec = time_to_next_release.to_i
       days, hours_in_sec = days_in_sec.divmod(60 * 60 * 24)
       hours, minutes_in_sec = hours_in_sec.divmod(60 * 60)
       minutes, seconds = minutes_in_sec.divmod(60)

@@ -4,6 +4,8 @@ require_relative 'template'
 
 module EGS
   class Schedule
+    include TimeHelper
+
     def plan
       loop do
         release_date_ahead? ? EGS::LOG.info('Skipping to the next release!') : serve_games_to_users
@@ -81,16 +83,6 @@ module EGS
                     time_to_next_release
                   end
       sleep that_much
-    end
-
-    def release_date_ahead?
-      time_to_next_release.positive?
-    rescue NoMethodError
-      false
-    end
-
-    def time_to_next_release
-      EGS::Models::FreeGame.next_date - Time.now
     end
   end
 end
