@@ -1,5 +1,3 @@
-require_relative 'queries'
-
 class GameHash < Hash
   include Hashie::Extensions::DeepFind
 end

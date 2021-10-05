@@ -1,7 +1,3 @@
-require_relative 'bot_service'
-require_relative 'egscraper'
-require_relative 'template'
-
 module EGS
   class Schedule
     include TimeHelper

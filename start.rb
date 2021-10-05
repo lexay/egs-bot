@@ -13,8 +13,10 @@ module EGS
   end
 end
 
-require_relative 'bot_service'
-require_relative 'scheduler'
+require_relative 'helpers/time_helpers'
+require_relative 'models/models'
+Dir['./lib/*.rb'].each { |f| require_relative f }
+# Dir['./lib/*.rb'].each(&method(:require_relative))
 
 EGS::TelegramService.new.listen
 EGS::Schedule.new.plan

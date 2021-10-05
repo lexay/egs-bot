@@ -1,6 +1,3 @@
-require_relative 'models'
-require_relative 'time_helper'
-
 module EGS
   class TelegramService
     include TimeHelper
