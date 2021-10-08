@@ -3,9 +3,11 @@ module EGS
     include TimeHelper
 
     def plan
-      loop do
-        release_date_ahead? ? EGS::LOG.info('Skipping to the next release!') : serve_games_to_users
-        wait 'next_release'
+      Thread.new do
+        loop do
+          release_date_ahead? ? EGS::LOG.info('Skipping to the next release!') : serve_games_to_users
+          wait 'next_release'
+        end
       end
     end
 

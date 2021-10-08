@@ -93,7 +93,7 @@ module EGS
                 pubs_n_devs: pubs_n_devs_get(games[idx]),
                 title: title_get(main_games[idx]),
                 short_description: description_get(main_games[idx], 'shortDescription'),
-                full_description: description_get(main_games[idx], 'full_description'),
+                full_description: description_get(main_games[idx], 'description'),
                 game_uri: urls[idx],
                 timestamp: Time.now }
             )
