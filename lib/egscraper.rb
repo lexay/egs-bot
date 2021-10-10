@@ -53,18 +53,19 @@ module EGS
     class Parser
       class << self
         def run
-          parse current_free_games
+          promotions = fetch_free_n_current
+          parse(promotions)
         end
 
         private
 
-        def all_promotions_get
+        def fetch_all_promotions
           games = Request.get(PROMO, content: 'application/json;charset=utf-8')
           GameHash[games].deep_find('elements') unless games.empty?
         end
 
-        def current_free_games
-          all_promotions = all_promotions_get
+        def fetch_free_n_current
+          all_promotions = fetch_all_promotions
           all_promotions.select do |promotion|
             offered_game = promotion.dig('promotions', 'promotionalOffers')
             next unless current?(offered_game) 
@@ -74,29 +75,36 @@ module EGS
           end
         end
 
-        def parse(games)
-          ids = games.map { |game| id_get(game) }
-          urls = url_get(ids)
-          main_games = main_game_get(ids)
-          bootstrap(games, main_games, urls)
+        def parse(games_and_addons)
+          ids = fetch_ids(games_and_addons)
+          uris = fetch_uris(ids)
+          games_only = fetch_games_only(ids)
+          bootstrap(games_and_addons, games_only, uris)
         end
 
-        def bootstrap(games, main_games, urls)
+        def bootstrap(games_and_addons, games_only, uris)
           bootstraped = []
 
-          count = games.count
+          count = games_and_addons.count
 
           0.upto(count - 1) do |idx|
-            bootstraped.push(
-              { start_date: date_get(games[idx], 'startDate'),
-                end_date: date_get(games[idx], 'endDate'),
-                pubs_n_devs: pubs_n_devs_get(games[idx]),
-                title: title_get(main_games[idx]),
-                short_description: description_get(main_games[idx], 'shortDescription'),
-                full_description: description_get(main_games[idx], 'description'),
-                game_uri: urls[idx],
+            current_game = games_and_addons[idx]
+
+            game_attributes = 
+              { start_date: fetch_date(current_game, 'startDate'),
+                end_date: fetch_date(current_game, 'endDate'),
+                pubs_n_devs: fetch_pubs_n_devs(current_game) }
+
+            current_game = games_only[idx]
+
+            game_attributes.merge!(
+              { title: fetch_title(current_game),
+                short_description: fetch_description(current_game, 'shortDescription'),
+                full_description: fetch_description(current_game, 'description'),
+                game_uri: uris[idx],
                 timestamp: Time.now }
             )
+            bootstraped.push(EGS::Models::FreeGame.new(game_attributes))
           end
           bootstraped
         end
@@ -109,15 +117,17 @@ module EGS
           GameArray.new(game).deep_find('discountPercentage').zero?
         end
 
-        def date_get(game, date)
+        def fetch_date(game, date)
           Time.parse GameHash[game].deep_find(date)
         end
 
-        def id_get(game)
-          game['productSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
+        def fetch_ids(games)
+          games.map do |game|
+            game['productSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
+          end
         end
 
-        def pubs_n_devs_get(game)
+        def fetch_pubs_n_devs(game)
           devs = game['customAttributes'].select do |attribute|
             attribute['key'] == 'developerName' ||
               attribute['key'] == 'publisherName'
@@ -125,27 +135,19 @@ module EGS
           devs.map { |dev_or_pub| dev_or_pub['value'] }.join(' / ')
         end
 
-        def game_details_get(ids)
-          games = []
+        def fetch_games_only(ids)
+          games_only = []
           ids.each do |id|
-            games.push Request.get(GAME_INFO_RU + id) if id
-            sleep rand(0.75..1.5)
-          end
-          games
-        end
-
-        def main_game_get(ids)
-          main_games_only = []
-          games_and_addons = game_details_get(ids)
-          games_and_addons.each do |game_or_addon|
-            game_or_addon['pages'].each do |product|
-              main_games_only.push product if product['type'] == 'productHome'
+            game_or_addon = Request.get(GAME_INFO_RU + id)
+            game_or_addon['pages'].each do |page|
+              games_only.push(page) if page['type'] == 'productHome'
+              sleep rand(0.75..1.5)
             end
           end
-          main_games_only
+          games_only
         end
 
-        def description_get(game, description)
+        def fetch_description(game, description)
           desc = GameHash[game].deep_find(description) || '-'
           sanitize(desc)
         end
@@ -157,11 +159,11 @@ module EGS
           description.partition(pattern).delete_if { |str| str =~ pattern }.join.strip
         end
 
-        def title_get(game)
+        def fetch_title(game)
           GameHash[game].deep_find('navTitle').strip
         end
 
-        def url_get(ids)
+        def fetch_uris(ids)
           ids.map { |id| PRODUCT + id }
         end
       end
