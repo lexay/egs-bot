@@ -14,7 +14,7 @@ module EGS
     private
 
     def serve_games_to_users
-      games = parse_games
+      games = fetch_parsed_games
       chat_ids = EGS::Models::User.chat_ids
       return EGS::LOG.info 'Games returned nothing! Skipping...' if games.empty?
       return EGS::LOG.info 'No subscribed users! Skipping...' if chat_ids.empty?
@@ -24,7 +24,7 @@ module EGS
       dispatch(games.count, chat_ids)
     end
 
-    def parse_games
+    def fetch_parsed_games
       5.times do
         promotions = EGS::Promotion::Parser.run
         return promotions unless promotions.empty?
@@ -35,9 +35,7 @@ module EGS
     end
 
     def store(games)
-      games.each do |game|
-        EGS::Models::FreeGame.new(game).save
-      end
+      games.each(&:save)
     end
 
     def dispatch(count, chat_ids)
