@@ -14,7 +14,7 @@ module EGS
 end
 
 require_relative 'helpers/time_helpers'
-require_relative 'models/models'
+require_relative 'db/models/models'
 Dir['./lib/*.rb'].each { |f| require_relative f }
 # Dir['./lib/*.rb'].each(&method(:require_relative))
 
