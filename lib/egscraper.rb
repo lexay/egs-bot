@@ -67,6 +67,8 @@ module EGS
         def fetch_free_n_current
           all_promotions = fetch_all_promotions
           all_promotions.select do |promotion|
+            next if addon?(promotion)
+
             offered_game = promotion.dig('promotions', 'promotionalOffers')
             next unless current?(offered_game) 
             next unless free?(offered_game)
@@ -107,6 +109,10 @@ module EGS
             bootstraped.push(EGS::Models::FreeGame.new(game_attributes))
           end
           bootstraped
+        end
+
+        def addon?(promotion)
+          promotion['productSlug'].nil?
         end
 
         def current?(game)
