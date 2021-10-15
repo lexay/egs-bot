@@ -5,7 +5,8 @@ module EGS
     def plan
       Thread.new do
         loop do
-          release_date_ahead? ? EGS::LOG.info('Skipping to the next release!') : serve_games_to_users
+          prepare_new_release
+          serve_games_to_users
           wait 'next_release'
         end
       end
@@ -13,15 +14,12 @@ module EGS
 
     private
 
-    def serve_games_to_users
-      games = fetch_parsed_games
-      chat_ids = EGS::Models::User.chat_ids
-      return EGS::LOG.info 'Games returned nothing! Skipping...' if games.empty?
-      return EGS::LOG.info 'No subscribed users! Skipping...' if chat_ids.empty?
+    def prepare_new_release
+      return EGS::LOG.info('Skipping to the next release!') if release_date_ahead?
 
+      EGS::Models::Release.init
+      games = fetch_parsed_games
       store(games)
-      EGS::LOG.info 'Games have been successfully saved to Database!'
-      dispatch(games.count, chat_ids)
     end
 
     def fetch_parsed_games
@@ -36,14 +34,23 @@ module EGS
 
     def store(games)
       games.each(&:save)
+      EGS::LOG.info 'Games have been successfully saved to Database!'
+    end
+
+    def serve_games_to_users
+      last_release = EGS::Models::Release.last
+      chat_ids_queued = JSON.parse(last_release.chat_ids_not_served)
+      return EGS::LOG.info 'All users have received the released games! Skipping...' if chat_ids_queued.empty?
+
+      dispatch(last_release.free_games, chat_ids_queued)
     end
 
     def dispatch(count, chat_ids)
-      games = EGS::Models::FreeGame.games(count)
-
-      chat_ids.each do |chat_id|
+      chat_ids.reverse_each do |chat_id|
         EGS::BotClient.api.send_message(chat_id: chat_id, text: EGS::Template.new(games), parse_mode: 'html')
         EGS::LOG.info "Games have been dispatched to #{chat_id}!"
+        chat_ids.pop
+        EGS::Models::Release.last.update(chat_ids_not_served: chat_ids).save
 
       # Telegram::Bot::Exceptions::ResponseError
       # Telegram API has returned the error. (ok: "false", error_code: "403",
