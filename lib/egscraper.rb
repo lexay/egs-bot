@@ -7,11 +7,9 @@ end
 
 module EGS
   class Promotion
-    PROMO = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=RU&allowCountries=RU'.freeze
-    GQL = 'https://www.epicgames.com/graphql'.freeze
+    PROMO_RU = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'.freeze
+    BASE_URI = 'https://www.epicgames.com/store/ru/product/'.freeze
     GAME_INFO_RU = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
-    GAME_INFO = 'https://store-content.ak.epicgames.com/api/en-US/content/products/'.freeze
-    PRODUCT = 'https://www.epicgames.com/store/ru/product/'.freeze
 
     class Request
       class << self
@@ -30,23 +28,6 @@ module EGS
 
           response.code == '200' ? JSON.parse(response.body) : []
         end
-
-        def post(uri_string, **options)
-          uri = URI.parse(uri_string)
-          request = Net::HTTP::Post.new(uri)
-
-          request['Accept'] = 'application/json, text/plain, */*'
-          request['Content-Type'] ||= options[:content]
-          request.body ||= options[:body]
-
-          secure = { use_ssl: uri.scheme == 'https' }
-
-          response = Net::HTTP.start(uri.hostname, uri.port, secure) do |http|
-            http.request(request)
-          end
-
-          response.code == '200' ? JSON.parse(response.body) : []
-        end
       end
     end
 
@@ -54,21 +35,19 @@ module EGS
       class << self
         def run
           promotions = fetch_free_n_current
-          parse(promotions)
+          bootstrap(promotions)
         end
 
         private
 
         def fetch_all_promotions
-          games = Request.get(PROMO, content: 'application/json;charset=utf-8')
+          games = Request.get(PROMO_RU, content: 'application/json;charset=utf-8')
           GameHash[games].deep_find('elements') unless games.empty?
         end
 
         def fetch_free_n_current
           all_promotions = fetch_all_promotions
           all_promotions.select do |promotion|
-            next if addon?(promotion)
-
             offered_game = promotion.dig('promotions', 'promotionalOffers')
             next unless current?(offered_game) 
             next unless free?(offered_game)
@@ -77,42 +56,19 @@ module EGS
           end
         end
 
-        def parse(games_and_addons)
-          ids = fetch_ids(games_and_addons)
-          uris = fetch_uris(ids)
-          games_only = fetch_games_only(ids)
-          bootstrap(games_and_addons, games_only, uris)
-        end
-
-        def bootstrap(games_and_addons, games_only, uris)
+        def bootstrap(games_and_addons)
           bootstraped = []
-
-          count = games_and_addons.count
-
-          0.upto(count - 1) do |idx|
-            current_game = games_and_addons[idx]
-
-            game_attributes = 
-              { start_date: fetch_date(current_game, 'startDate'),
-                end_date: fetch_date(current_game, 'endDate'),
-                pubs_n_devs: fetch_pubs_n_devs(current_game) }
-
-            current_game = games_only[idx]
-
-            game_attributes.merge!(
-              { title: fetch_title(current_game),
-                short_description: fetch_description(current_game, 'shortDescription'),
-                full_description: fetch_description(current_game, 'description'),
-                game_uri: uris[idx],
-                timestamp: Time.now }
-            )
+          games_and_addons.each do |game_or_addon|
+            game_attributes =
+              { title: fetch_title(game_or_addon),
+                description: fetch_description(game_or_addon),
+                pubs_n_devs: fetch_pubs_n_devs(game_or_addon),
+                game_uri: fetch_uri(game_or_addon),
+                start_date: fetch_date(game_or_addon, 'startDate'),
+                end_date: fetch_date(game_or_addon, 'endDate') }
             bootstraped.push(EGS::Models::FreeGame.new(game_attributes))
           end
           bootstraped
-        end
-
-        def addon?(promotion)
-          promotion['productSlug'].nil?
         end
 
         def current?(game)
@@ -123,38 +79,12 @@ module EGS
           GameArray.new(game).deep_find('discountPercentage').zero?
         end
 
-        def fetch_date(game, date)
-          Time.parse GameHash[game].deep_find(date)
+        def fetch_title(game)
+          game['title']
         end
 
-        def fetch_ids(games)
-          games.map do |game|
-            game['productSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
-          end
-        end
-
-        def fetch_pubs_n_devs(game)
-          devs = game['customAttributes'].select do |attribute|
-            attribute['key'] == 'developerName' ||
-              attribute['key'] == 'publisherName'
-          end
-          devs.map { |dev_or_pub| dev_or_pub['value'] }.join(' / ')
-        end
-
-        def fetch_games_only(ids)
-          games_only = []
-          ids.each do |id|
-            game_or_addon = Request.get(GAME_INFO_RU + id)
-            game_or_addon['pages'].each do |page|
-              games_only.push(page) if page['type'] == 'productHome'
-              sleep rand(0.75..1.5)
-            end
-          end
-          games_only
-        end
-
-        def fetch_description(game, description)
-          desc = GameHash[game].deep_find(description) || '-'
+        def fetch_description(game)
+          desc = game['description'] || '-'
           sanitize(desc)
         end
 
@@ -165,12 +95,25 @@ module EGS
           description.partition(pattern).delete_if { |str| str =~ pattern }.join.strip
         end
 
-        def fetch_title(game)
-          GameHash[game].deep_find('navTitle').strip
+        def fetch_pubs_n_devs(game)
+          devs = game['customAttributes'].select do |attribute|
+            attribute['key'] == 'developerName' ||
+              attribute['key'] == 'publisherName'
+          end
+          devs.map { |dev_or_pub| dev_or_pub['value'] }.join(' / ')
         end
 
-        def fetch_uris(ids)
-          ids.map { |id| PRODUCT + id }
+        def fetch_id(game)
+          game['urlSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
+        end
+
+        def fetch_uri(game)
+          id = fetch_id(game)
+          BASE_URI + id
+        end
+
+        def fetch_date(game, date)
+          Time.parse GameHash[game].deep_find(date)
         end
       end
     end
