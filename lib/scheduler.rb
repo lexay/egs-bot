@@ -42,10 +42,13 @@ module EGS
       chat_ids_queued = JSON.parse(last_release.chat_ids_not_served)
       return EGS::LOG.info 'All users have received the released games! Skipping...' if chat_ids_queued.empty?
 
-      dispatch(last_release.free_games, chat_ids_queued)
+      games = last_release.free_games
+      return EGS::LOG.info 'No games! Skipping...' if games.nil? || games.empty?
+
+      dispatch(games, chat_ids_queued)
     end
 
-    def dispatch(count, chat_ids)
+    def dispatch(games, chat_ids)
       chat_ids.reverse_each do |chat_id|
         EGS::BotClient.api.send_message(chat_id: chat_id, text: EGS::Template.new(games), parse_mode: 'html')
         EGS::LOG.info "Games have been dispatched to #{chat_id}!"
