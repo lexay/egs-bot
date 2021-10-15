@@ -38,7 +38,7 @@ module EGS
     end
 
     def serve_games_to_users
-      last_release = EGS::Models::Release.last
+      last_release = EGS::Models::Release.last || EGS::Models::Release.init
       chat_ids_queued = JSON.parse(last_release.chat_ids_not_served)
       return EGS::LOG.info 'All users have received the released games! Skipping...' if chat_ids_queued.empty?
 
