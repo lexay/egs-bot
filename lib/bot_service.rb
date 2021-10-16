@@ -11,10 +11,8 @@ module EGS
             # BotClient.api.get_chat_member(chat_id: message.chat.id, user_id: message.from.id)
             case user_status
             when 'member'
-              EGS::Models::User.create(name: message.chat.username, chat_id: message.chat.id, timestamp: Time.now)
+              EGS::Models::User.new(name: message.chat.username, chat_id: message.chat.id, timestamp: Time.now).save
               EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is subscribed!"
-              formatted_latest_games = Template.new(EGS::Models::Release.last.free_games)
-              EGS::BotClient.api.send_message(chat_id: message.chat.id, text: formatted_latest_games)
             when 'kicked'
               EGS::Models::User.unsubscribe(message.chat.id)
               EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is unsubscribed!"
