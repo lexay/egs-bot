@@ -7,6 +7,7 @@ module EGS
       show_idx = ->(idx) { format('%i. ', idx + 1) }
       show_no_idx = proc { '' }
       game_idx = games.count > 1 ? show_idx : show_no_idx
+
       games.each_with_index do |game, idx|
         message = <<~MESSAGE
           <strong>Название:</strong> <a href='#{game.game_uri}'>#{game.title}</a>
@@ -14,7 +15,7 @@ module EGS
           <strong>Издатель / Разработчик:</strong> #{game.pubs_n_devs}
 
           <strong>Описание:</strong>
-          #{game.short_description.length < 10 ? game.full_description : game.short_description}
+          #{game.description}
           <a href='#{game.game_uri}'>...</a>
 
         MESSAGE
@@ -31,3 +32,4 @@ module EGS
     end
   end
 end
+# #{game.short_description.length < 10 ? game.full_description : game.short_description}
