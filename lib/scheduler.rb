@@ -15,7 +15,7 @@ module EGS
     private
 
     def prepare_new_release
-      return EGS::LOG.info('Skipping to the next release!') if release_date_ahead?
+      return EGS::LOG.info('No new release! Skipping...') if release_date_ahead?
 
       EGS::Models::Release.init
       games = fetch_parsed_games
@@ -88,6 +88,7 @@ module EGS
                   when 'next_release'
                     time_to_next_release
                   end
+      EGS::LOG.info "Sleeping for: #{date}..."
       sleep that_much
     end
   end
