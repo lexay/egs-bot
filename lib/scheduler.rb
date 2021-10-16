@@ -88,7 +88,7 @@ module EGS
                   when 'next_release'
                     time_to_next_release
                   end
-      EGS::LOG.info "Sleeping for: #{date}..."
+      EGS::LOG.info "Sleeping for: #{seconds_to_human_readable(that_much)}..."
       sleep that_much
     end
   end

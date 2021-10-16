@@ -25,14 +25,8 @@ module EGS
     end
 
     def time_left
-      return 'Следующая раздача неизвестна!' unless release_date_ahead?
-
-      days_in_sec = time_to_next_release.to_i
-      days, hours_in_sec = days_in_sec.divmod(60 * 60 * 24)
-      hours, minutes_in_sec = hours_in_sec.divmod(60 * 60)
-      minutes, seconds = minutes_in_sec.divmod(60)
-      "Вы подписаны!\n" \
-      "Следующая раздача через: #{days} дн.: #{hours} ч.: #{minutes} м.: #{seconds} с."
+      date = seconds_to_human_readable(time_to_next_release.to_i)
+      "Вы подписаны!\nСледующая раздача через: #{date}"
     end
   end
 end
