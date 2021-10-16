@@ -1,6 +1,8 @@
 module EGS
   module Template
     def self.new(games)
+      return '' if games.empty?
+
       a_game = games.first
       text = "Текущая раздача от ЕГС с #{stringify a_game.start_date} по #{stringify a_game.end_date}:\n\n"
 
