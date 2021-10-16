@@ -13,14 +13,19 @@ module EGS
     end
 
     class User < Sequel::Model
+      plugin :validation_helpers
+
+      def validate
+        super
+        validates_unique :chat_id
+      end
+
       def self.chat_ids
         all.map(&:chat_id)
       end
 
       def self.subscribe(username, chat_id)
-        User.create(name: username, chat_id: chat_id)
-      rescue Sequel::UniqueConstraintViolation => e
-        EGS::LOG.info e.message
+        User.new(name: username, chat_id: chat_id).save
       end
 
       def self.unsubscribe(chat_id)

@@ -13,6 +13,9 @@ module EGS
             when 'member'
               EGS::Models::User.subscribe(message.chat.username, message.chat.id)
               EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is subscribed!"
+              latest_games = EGS::Models::Release.last.free_games
+              formatted_latest_games = latest_games.empty? ? 'Раздача неизвестна!' : Template.new(latest_games)
+              EGS::BotClient.api.send_message(chat_id: message.chat.id, text: formatted_latest_games)
             when 'kicked'
               EGS::Models::User.unsubscribe(message.chat.id)
               EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is unsubscribed!"
