@@ -14,6 +14,7 @@ module EGS
 
     class User < Sequel::Model
       plugin :validation_helpers
+      self.raise_on_save_failure = false
 
       def validate
         super
