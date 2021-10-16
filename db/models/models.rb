@@ -17,6 +17,12 @@ module EGS
         all.map(&:chat_id)
       end
 
+      def self.subscribe(username, chat_id)
+        User.create(name: username, chat_id: chat_id)
+      rescue Sequel::UniqueConstraintViolation => e
+        EGS::LOG.info e.message
+      end
+
       def self.unsubscribe(chat_id)
         where(chat_id: chat_id).delete
       end
