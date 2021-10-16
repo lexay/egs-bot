@@ -25,7 +25,7 @@ module EGS
     end
 
     def time_left
-      date = seconds_to_human_readable(time_to_next_release.to_i)
+      date = seconds_to_human_readable(time_to_next_release)
       "Вы подписаны!\nСледующая раздача через: #{date}"
     end
   end
