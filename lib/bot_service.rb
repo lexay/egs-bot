@@ -1,5 +1,7 @@
 module EGS
   class TelegramService
+    include BotHelper
+    include GameHelper
     include TimeHelper
 
     def listen
@@ -13,15 +15,13 @@ module EGS
             when 'member'
               EGS::Models::User.subscribe(message.chat.username, message.chat.id)
               EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is subscribed!"
-              latest_games = EGS::Models::Release.last.free_games
-              formatted_latest_games = latest_games.empty? ? 'Раздача неизвестна!' : Template.new(latest_games)
-              EGS::BotClient.api.send_message(chat_id: message.chat.id, text: formatted_latest_games)
+              send_message(formatted_latest_games, message.chat.id)
             when 'kicked'
               EGS::Models::User.unsubscribe(message.chat.id)
               EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is unsubscribed!"
             end
           when Telegram::Bot::Types::Message
-            EGS::BotClient.api.send_message(chat_id: message.chat.id, text: time_left) if message.text == '/start'
+            send_message(time_left, message.chat.id) if message.text == '/start'
           end
         end
       end

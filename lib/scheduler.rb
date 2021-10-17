@@ -1,5 +1,7 @@
 module EGS
   class Schedule
+    include BotHelper
+    include GameHelper
     include TimeHelper
 
     def plan
@@ -38,29 +40,26 @@ module EGS
     end
 
     def serve_games_to_users
-      last_release = EGS::Models::Release.last || EGS::Models::Release.init
-      chat_ids_queued = JSON.parse(last_release.chat_ids_not_served)
-      return EGS::LOG.info 'All users have received the released games! Skipping...' if chat_ids_queued.empty?
+      chat_ids_queued = JSON.parse(latest_release.chat_ids_not_served)
+      return EGS::LOG.info 'No queued users! Skipping...' if chat_ids_queued.empty?
+      return EGS::LOG.info 'No games! Skipping...' if latest_games.empty?
 
-      games = last_release.free_games
-      return EGS::LOG.info 'No games! Skipping...' if games.nil? || games.empty?
-
-      dispatch(games, chat_ids_queued)
+      dispatch(formatted_latest_games, chat_ids_queued)
     end
 
     def dispatch(games, chat_ids)
       chat_ids.reverse_each do |chat_id|
-        EGS::BotClient.api.send_message(chat_id: chat_id, text: EGS::Template.new(games), parse_mode: 'html')
+        send_message(games, chat_id)
         EGS::LOG.info "Games have been dispatched to #{chat_id}!"
         chat_ids.pop
-        EGS::Models::Release.last.update(chat_ids_not_served: chat_ids).save
+        latest_release.update(chat_ids_not_served: JSON.pretty_generate(chat_ids))
 
       # Telegram::Bot::Exceptions::ResponseError
       # Telegram API has returned the error. (ok: "false", error_code: "403",
       # description: "Forbidden: bot was blocked by the user")
 
-      rescue => exception 
-        EGS::LOG.error exception.message
+      rescue => e
+        EGS::LOG.error e.message
 
         if process(exception)[:error_code] == '403'
           EGS::LOG.info "Invalid user(#{chat_id}). Unsubscribing..."
@@ -69,6 +68,7 @@ module EGS
 
         next
       end
+      EGS::LOG.info 'All users have received the current games!'
     end
 
     def process(exception)
