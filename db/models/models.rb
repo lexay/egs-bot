@@ -3,12 +3,8 @@ module EGS
     class FreeGame < Sequel::Model
       many_to_one :release
 
-      def self.games(count = 1)
-        order_by(:id).last(count)
-      end
-
       def self.next_date
-        games.empty? ? nil : games.last.end_date
+        last.end_date
       end
     end
 
