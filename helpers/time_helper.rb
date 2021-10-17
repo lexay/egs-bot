@@ -1,8 +1,9 @@
 module TimeHelper
   def time_to_next_release
-    (EGS::Models::FreeGame.next_date - Time.now).to_i
-  rescue NoMethodError
-    -1
+    next_date = EGS::Models::FreeGame.next_date
+    return -1 if next_date.nil? 
+
+    (next_date - Time.now).to_i
   end
 
   def release_date_ahead?
