@@ -47,12 +47,11 @@ module EGS
       dispatch(formatted_latest_games, chat_ids_queued)
     end
 
-    def dispatch(games, chat_ids)
-      chat_ids.reverse_each do |chat_id|
+    def dispatch(games, chat_ids_queued)
+      chat_ids_queued.reverse_each do |chat_id|
         send_message(games, chat_id)
         EGS::LOG.info "Games have been dispatched to #{chat_id}!"
-        chat_ids.pop
-        latest_release.update(chat_ids_not_served: JSON.pretty_generate(chat_ids))
+        move_up_and_save(chat_ids_queued)
 
       # Telegram::Bot::Exceptions::ResponseError
       # Telegram API has returned the error. (ok: "false", error_code: "403",
@@ -61,12 +60,11 @@ module EGS
       rescue => e
         EGS::LOG.error e.message
 
-        if process(exception)[:error_code] == '403'
+        if process(e)[:error_code] == '403'
           EGS::LOG.info "Invalid user(#{chat_id}). Unsubscribing..."
           EGS::Models::User.unsubscribe chat_id
+          move_up_and_save(chat_ids_queued)
         end
-
-        next
       end
       EGS::LOG.info 'All users have received the current games!'
     end
@@ -77,6 +75,11 @@ module EGS
         .split(',')
         .to_h { |k_v_pair| [k_v_pair[/\w+[^:]/], k_v_pair[/(?<=\").+[^"]/]] }
         .transform_keys(&:to_sym)
+    end
+
+    def move_up_and_save(queue)
+      queue.pop
+      latest_release.update(chat_ids_not_served: queue.to_json)
     end
 
     def wait(date)
