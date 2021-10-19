@@ -33,7 +33,7 @@ module EGS
     class Release < Sequel::Model
       one_to_many :free_games
       def self.init
-        Release.create(chat_ids_not_served: JSON.pretty_generate(EGS::Models::User.chat_ids))
+        Release.create(chat_ids_not_served: User.chat_ids.to_json)
       end
     end
   end
