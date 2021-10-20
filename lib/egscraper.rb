@@ -49,7 +49,7 @@ module EGS
           all_promotions = fetch_all_promotions
           all_promotions.select do |promotion|
             offered_game = promotion.dig('promotions', 'promotionalOffers')
-            next unless current?(offered_game) 
+            next unless current?(offered_game)
             next unless free?(offered_game)
 
             promotion
@@ -81,19 +81,27 @@ module EGS
         end
 
         def fetch_title(game)
-          game['title']
+          title = game['title']
+          fallback(game, 'navTitle') if title.empty?
         end
 
         def fetch_description(game)
-          desc = game['description'] || '-'
-          sanitize(desc)
+          short_desc = game['description'] || '-'
+          fallback(game, 'description') if short_desc.length < 20
         end
 
         def sanitize(description)
           description.delete! '*'
           description.delete! '#'
           pattern = /!?\[.+\)/
-          description.partition(pattern).delete_if { |str| str =~ pattern }.join.strip
+          description.split("\n\n").reject { |sentence| sentence[pattern] }.join
+        end
+
+        def fallback(game, attribute)
+          id = fetch_id(game)
+          request = Request.get(GAME_INFO_RU + id)
+          base_game = request['pages'].select { |page| page['type'] == 'productHome' }
+          GameArray.new(base_game).deep_find(attribute)
         end
 
         def fetch_pubs_n_devs(game)
