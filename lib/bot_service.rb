@@ -7,21 +7,22 @@ module EGS
     def listen
       EGS::BotClient.run do |bot|
         bot.listen do |message|
+          username = message.chat.username
+          chat_id = message.chat.id
           case message
           when Telegram::Bot::Types::ChatMemberUpdated
             user_status = message.new_chat_member.status
-            # BotClient.api.get_chat_member(chat_id: message.chat.id, user_id: message.from.id)
             case user_status
             when 'member'
-              EGS::Models::User.subscribe(message.chat.username, message.chat.id)
-              EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is subscribed!"
-              send_message(formatted_latest_games, message.chat.id)
+              EGS::Models::User.subscribe(username, chat_id)
+              EGS::LOG.info "User: #{username}(#{chat_id}) is subscribed!"
+              send_message(formatted_latest_games, chat_id)
             when 'kicked'
-              EGS::Models::User.unsubscribe(message.chat.id)
-              EGS::LOG.info "User: #{message.from.username}(#{message.chat.id}) is unsubscribed!"
+              EGS::Models::User.unsubscribe(chat_id)
+              EGS::LOG.info "User: #{username}(#{chat_id}) is unsubscribed!"
             end
           when Telegram::Bot::Types::Message
-            send_message(time_left, message.chat.id) if message.text == '/start'
+            send_message(time_left, chat_id) if message.text == '/start'
           end
         end
       end

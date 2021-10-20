@@ -32,4 +32,3 @@ module EGS
     end
   end
 end
-# #{game.short_description.length < 10 ? game.full_description : game.short_description}
