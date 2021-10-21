@@ -82,12 +82,12 @@ module EGS
 
         def fetch_title(game)
           title = game['title']
-          fallback(game, 'navTitle') if title.empty?
+          title.empty? ? fallback(game, 'navTitle') : title
         end
 
         def fetch_description(game)
           short_desc = game['description'] || '-'
-          fallback(game, 'description') if short_desc.length < 20
+          short_desc.length < 20 ? fallback(game, 'description') : short_desc
         end
 
         def sanitize(description)
@@ -109,7 +109,7 @@ module EGS
             attribute['key'] == 'developerName' ||
               attribute['key'] == 'publisherName'
           end
-          devs.map { |dev_or_pub| dev_or_pub['value'] }.join(' / ')
+          devs.map { |dev_or_pub| dev_or_pub['value'] }.uniq.join(' / ')
         end
 
         def fetch_id(game)
