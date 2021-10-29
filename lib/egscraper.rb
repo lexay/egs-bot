@@ -86,13 +86,20 @@ module EGS
         end
 
         def fetch_description(game)
-          short_desc = game['description'] || '-'
-          short_desc.length < 20 ? fallback(game, 'description') : short_desc
+          short_desc = game['description']
+          true_desc = short_desc.length < 20 || not_ru_lang?(short_desc) ? fallback(game, 'description') : short_desc
+          sanitize(true_desc)
+        end
+
+        def not_ru_lang?(description)
+          description[/[А-я]+/].nil?
         end
 
         def sanitize(description)
           description.delete! '*'
           description.delete! '#'
+          description.delete! '_'
+          description.strip!
           pattern = /!?\[.+\)/
           description.split("\n\n").reject { |sentence| sentence[pattern] }.join
         end
