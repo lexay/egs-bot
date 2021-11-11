@@ -1,7 +1,7 @@
 module EGS
   module Template
     def self.new(games)
-      a_game = games.first
+      a_game = games.last
       text = "Текущая раздача от ЕГС с #{stringify a_game.start_date} по #{stringify a_game.end_date}:\n\n"
 
       show_idx = ->(idx) { format('%i. ', idx + 1) }
