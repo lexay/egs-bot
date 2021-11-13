@@ -1,14 +1,18 @@
 module EGS
   module Template
     def self.new(games)
-      a_game = games.last
-      text = "Текущая раздача от ЕГС с #{stringify a_game.start_date} по #{stringify a_game.end_date}:\n\n"
+      info = ''
+      expiration_date = ''
 
       show_idx = ->(idx) { format('%i. ', idx + 1) }
       show_no_idx = proc { '' }
       game_idx = games.count > 1 ? show_idx : show_no_idx
 
       games.each_with_index do |game, idx|
+        header = "Текущая раздача от ЕГС с #{stringify game.start_date} по #{stringify game.end_date}:\n\n"
+        header = '' if expiration_date == game.end_date
+        expiration_date = game.end_date
+
         message = <<~MESSAGE
           <strong>Название:</strong> <a href='#{game.game_uri}'>#{game.title}</a>
 
@@ -19,9 +23,9 @@ module EGS
           <a href='#{game.game_uri}'>...</a>
 
         MESSAGE
-        text << game_idx.call(idx) << message
+        info << header << game_idx.call(idx) << message
       end
-      text
+      info
     end
 
     def self.stringify(date)
