@@ -120,7 +120,7 @@ module EGS
         end
 
         def fetch_id(game)
-          game['urlSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
+          game['productSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
         end
 
         def fetch_uri(game)
