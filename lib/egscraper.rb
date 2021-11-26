@@ -1,10 +1,3 @@
-class GameHash < Hash
-  include Hashie::Extensions::DeepFind
-end
-class GameArray < Array
-  include Hashie::Extensions::DeepFind
-end
-
 module EGS
   class Promotion
     PROMO_RU = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'.freeze
@@ -26,7 +19,10 @@ module EGS
             http.request(request)
           end
 
-          response.code == '200' ? JSON.parse(response.body) : []
+          (EGS::LOG.info "Response has returned #{response.code}. Exiting..."; exit) unless response.code == '200'
+
+          hash = JSON.parse(response.body)
+          hash.deep_transform_keys! { |key| key.underscore.to_sym }
         end
       end
     end
@@ -34,26 +30,26 @@ module EGS
     class Parser
       class << self
         def run
-          promotions = fetch_free_n_current
-          bootstrap(promotions)
+          games = fetch_games
+          bootstrap(games)
         end
 
         private
 
-        def fetch_all_promotions
-          games = Request.get(PROMO_RU, content: 'application/json;charset=utf-8')
-          GameHash[games].deep_find('elements') unless games.empty?
+        def fetch_games
+          request = Request.get(PROMO_RU, content: 'application/json;charset=utf-8')
+          all_promo_games = request.dig(:data, :catalog, :search_store, :elements)
+          all_promo_games.select do |game|
+            current_and_free?(game)
+          end
         end
 
-        def fetch_free_n_current
-          all_promotions = fetch_all_promotions
-          all_promotions.select do |promotion|
-            offered_game = promotion.dig('promotions', 'promotionalOffers')
-            next unless current?(offered_game)
-            next unless free?(offered_game)
+        def current_and_free?(game)
+          game_type = game.dig(:promotions, :promotional_offers)
+          return false if game_type.nil? || game_type.empty?
 
-            promotion
-          end
+          game.extend Hashie::Extensions::DeepFind
+          game.deep_find(:discount_percentage).zero?
         end
 
         def bootstrap(games_and_addons)
@@ -64,30 +60,22 @@ module EGS
                 description: fetch_description(game_or_addon),
                 pubs_n_devs: fetch_pubs_n_devs(game_or_addon),
                 game_uri: fetch_uri(game_or_addon),
-                start_date: fetch_date(game_or_addon, 'startDate'),
-                end_date: fetch_date(game_or_addon, 'endDate'),
+                start_date: fetch_date(game_or_addon, :start_date),
+                end_date: fetch_date(game_or_addon, :end_date),
                 release_id: EGS::Models::Release.last.id }
             bootstraped.push(EGS::Models::FreeGame.new(game_attributes))
           end
           bootstraped
         end
 
-        def current?(game)
-          game.nil? || game.empty? ? false : true
-        end
-
-        def free?(game)
-          GameArray.new(game).deep_find('discountPercentage').zero?
-        end
-
         def fetch_title(game)
-          title = game['title']
-          title.empty? ? fallback(game, 'navTitle') : title
+          title = game[:title]
+          title.empty? ? fallback(game)[:nav_title] : title
         end
 
         def fetch_description(game)
-          short_desc = game['description']
-          true_desc = short_desc.length < 20 || not_ru_lang?(short_desc) ? fallback(game, 'description') : short_desc
+          short_desc = game[:description]
+          true_desc = short_desc.length < 50 || not_ru_lang?(short_desc) ? fallback(game)[:description] : short_desc
           sanitize(true_desc)
         end
 
@@ -101,26 +89,33 @@ module EGS
           description.delete! '_'
           description.strip!
           pattern = /!?\[.+\)/
-          description.split("\n\n").reject { |sentence| sentence[pattern] }.join
+          description.split("\n\n").reject { |sentence| sentence[pattern] }.join("\n\n")
         end
 
-        def fallback(game, attribute)
+        def fallback(game)
           id = fetch_id(game)
           request = Request.get(GAME_INFO_RU + id)
-          base_game = request['pages'].select { |page| page['type'] == 'productHome' }
-          GameArray.new(base_game).deep_find(attribute)
+          base_game = request[:pages].select { |page| page[:type] == 'productHome' }
+          base_game.extend Hashie::Extensions::DeepFind
+          base_game.deep_find(:about)
         end
 
         def fetch_pubs_n_devs(game)
-          devs = game['customAttributes'].select do |attribute|
-            attribute['key'] == 'developerName' ||
-              attribute['key'] == 'publisherName'
+          publisher = ''
+          developer = ''
+          attributes = game[:custom_attributes]
+          attributes.each do |attribute|
+            developer = attribute[:value] if attribute[:key] == 'developerName'
+            publisher = attribute[:value] if attribute[:key] == 'publisherName'
           end
-          devs.map { |dev_or_pub| dev_or_pub['value'] }.uniq.join(' / ')
+          about_section = fallback(game) if publisher.empty? || developer.empty?
+          publisher = about_section[:publisher_attribution]
+          developer = about_section[:developer_attribution]
+          [developer, publisher].uniq.join(' / ')
         end
 
         def fetch_id(game)
-          game['productSlug'].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
+          game[:product_slug].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
         end
 
         def fetch_uri(game)
@@ -129,7 +124,8 @@ module EGS
         end
 
         def fetch_date(game, date)
-          Time.parse GameHash[game].deep_find(date)
+          game.extend Hashie::Extensions::DeepFind
+          Time.parse game.deep_find(date)
         end
       end
     end
