@@ -70,12 +70,12 @@ module EGS
 
         def fetch_title(game)
           title = game[:title]
-          title.empty? ? fallback(game)[:nav_title] : title
+          title.empty? ? fetch_about(game)[:nav_title] : title
         end
 
         def fetch_description(game)
           short_desc = game[:description]
-          true_desc = short_desc.length < 50 || not_ru_lang?(short_desc) ? fallback(game)[:description] : short_desc
+          true_desc = short_desc.length < 50 || not_ru_lang?(short_desc) ? fetch_about(game)[:description] : short_desc
           sanitize(true_desc)
         end
 
@@ -84,15 +84,13 @@ module EGS
         end
 
         def sanitize(description)
-          description.delete! '*'
-          description.delete! '#'
-          description.delete! '_'
+          description.delete! '*#_'
           description.strip!
           pattern = /!?\[.+\)/
           description.split("\n\n").reject { |sentence| sentence[pattern] }.join("\n\n")
         end
 
-        def fallback(game)
+        def fetch_about(game)
           id = fetch_id(game)
           request = Request.get(GAME_INFO_RU + id)
           base_game = request[:pages].select { |page| page[:type] == 'productHome' }
@@ -101,17 +99,17 @@ module EGS
         end
 
         def fetch_pubs_n_devs(game)
-          publisher = ''
-          developer = ''
+          publisher = nil
+          developer = nil
           attributes = game[:custom_attributes]
           attributes.each do |attribute|
             developer = attribute[:value] if attribute[:key] == 'developerName'
             publisher = attribute[:value] if attribute[:key] == 'publisherName'
           end
-          about_section = fallback(game) if publisher.empty? || developer.empty?
-          publisher = about_section[:publisher_attribution]
-          developer = about_section[:developer_attribution]
-          [developer, publisher].uniq.join(' / ')
+          about_section = fetch_about(game) if publisher.nil? || developer.nil?
+          publisher ||= about_section[:publisher_attribution]
+          developer ||= about_section[:developer_attribution]
+          [developer, publisher].uniq.join(' - ')
         end
 
         def fetch_id(game)
