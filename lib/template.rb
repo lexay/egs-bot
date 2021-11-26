@@ -19,8 +19,7 @@ module EGS
           <strong>Издатель / Разработчик:</strong> #{game.pubs_n_devs}
 
           <strong>Описание:</strong>
-          #{game.description}
-          <a href='#{game.game_uri}'>...</a>
+          #{game.description.truncate(300, separator: '.')}
 
         MESSAGE
         info << header << game_idx.call(idx) << message
