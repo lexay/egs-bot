@@ -19,19 +19,17 @@ module EGS
     def prepare_new_release
       return EGS::LOG.info('No new release! Skipping...') if release_date_ahead?
 
+      games = EGS::Promotion::Parser.run
+      return EGS::LOG.info('Empty date! Skipping...') if release_date_empty?(games)
+      return EGS::LOG.info('Release same as last one! Skipping...') if games == EGS::Models::Release.last.free_games
+
       EGS::Models::Release.init
-      games = fetch_parsed_games
+      games.map { |game| game.release_id = EGS::Models::Release.last.id }
       store(games)
     end
 
-    def fetch_parsed_games
-      5.times do
-        promotions = EGS::Promotion::Parser.run
-        return promotions unless promotions.empty?
-
-        wait '5 mins'
-      end
-      []
+    def release_date_empty?(games)
+      games.first.end_date.nil?
     end
 
     def store(games)
@@ -89,7 +87,7 @@ module EGS
                   when 'day'
                     60 * 60 * 24
                   when 'next_release'
-                    time_to_next_release
+                    time_to_next_release + 30
                   end
       EGS::LOG.info "Sleeping for: #{seconds_to_human_readable(that_much)}..."
       sleep that_much

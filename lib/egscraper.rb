@@ -61,8 +61,7 @@ module EGS
                 pubs_n_devs: fetch_pubs_n_devs(game_or_addon),
                 game_uri: fetch_uri(game_or_addon),
                 start_date: fetch_date(game_or_addon, :start_date),
-                end_date: fetch_date(game_or_addon, :end_date),
-                release_id: EGS::Models::Release.last.id }
+                end_date: fetch_date(game_or_addon, :end_date) }
             bootstraped.push(EGS::Models::FreeGame.new(game_attributes))
           end
           bootstraped
