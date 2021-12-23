@@ -6,6 +6,14 @@ module EGS
       def self.next_date
         last.end_date
       end
+
+      def eql?(other_item)
+        self.title == other_item.title && self.start_date == other_item.start_date
+      end
+
+      def hash
+        self.title.hash ^ self.start_date.hash
+      end
     end
 
     class User < Sequel::Model
