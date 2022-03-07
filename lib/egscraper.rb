@@ -44,6 +44,10 @@ module EGS
           end
         end
 
+        def a_pack?(game)
+          game[:product_slug].nil?
+        end
+
         def current_and_free?(game)
           game_type = game.dig(:promotions, :promotional_offers)
           return false if game_type.nil? || game_type.empty?
@@ -69,17 +73,29 @@ module EGS
 
         def fetch_title(game)
           title = game[:title]
-          title.empty? ? fetch_about(game)[:nav_title] : title
+          return title if a_pack?(game)
+          return title unless title.empty?
+
+          fetch_about(game)[:nav_title]
         end
 
         def fetch_description(game)
-          short_desc = game[:description]
-          true_desc = short_desc.length < 50 || not_ru_lang?(short_desc) ? fetch_about(game)[:description] : short_desc
-          sanitize(true_desc)
+          description = parse_description(game)
+          sanitize(description)
         end
 
-        def not_ru_lang?(description)
-          description[/[А-я]+/].nil?
+        def parse_description(game)
+          description = game[:description]
+          return description if a_pack?(game)
+          return description if !(description.empty? || description.nil?) &&
+                                ru_lang?(description) &&
+                                description.length > 50
+
+          fetch_about(game)[:description]
+        end
+
+        def ru_lang?(description)
+          !description[/[А-я]+/].nil?
         end
 
         def sanitize(description)
@@ -98,6 +114,9 @@ module EGS
         end
 
         def fetch_pubs_n_devs(game)
+          game.extend Hashie::Extensions::DeepFind
+          return game.deep_find(:seller)[:name] if a_pack?(game)
+
           publisher = nil
           developer = nil
           attributes = game[:custom_attributes]
@@ -112,7 +131,8 @@ module EGS
         end
 
         def fetch_id(game)
-          game[:product_slug].chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
+          game_slug = game[:product_slug] || game[:url_slug]
+          game_slug.chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
         end
 
         def fetch_uri(game)
