@@ -127,7 +127,7 @@ module EGS
           about_section = fetch_about(game) if publisher.nil? || developer.nil?
           publisher ||= about_section[:publisher_attribution]
           developer ||= about_section[:developer_attribution]
-          [developer, publisher].uniq.join(' - ')
+          [publisher, developer].uniq.join(' - ')
         end
 
         def fetch_id(game)
