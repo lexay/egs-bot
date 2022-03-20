@@ -1,7 +1,7 @@
 module EGS
   class Promotion
     PROMO_RU = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'.freeze
-    BASE_URI = 'https://www.epicgames.com/store/ru/product/'.freeze
+    BASE_URI = 'https://store.epicgames.com/ru/p/'.freeze
     GAME_INFO_RU = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
 
     class Request
@@ -87,7 +87,7 @@ module EGS
         def parse_description(game)
           description = game[:description]
           return description if a_pack?(game)
-          return description if !(description.empty? || description.nil?) &&
+          return description if !(description.nil? || description.empty?) &&
                                 ru_lang?(description) &&
                                 description.length > 50
 
@@ -121,8 +121,11 @@ module EGS
           developer = nil
           attributes = game[:custom_attributes]
           attributes.each do |attribute|
-            developer = attribute[:value] if attribute[:key] == 'developerName'
-            publisher = attribute[:value] if attribute[:key] == 'publisherName'
+            key = attribute[:key]
+            value = attribute[:value]
+            pattern = /\w+/
+            developer = value if key == 'developerName' && value && !value[pattern].nil?
+            publisher = value if key == 'publisherName' && value && !value[pattern].nil?
           end
           about_section = fetch_about(game) if publisher.nil? || developer.nil?
           publisher ||= about_section[:publisher_attribution]
