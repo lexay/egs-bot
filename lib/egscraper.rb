@@ -40,20 +40,9 @@ module EGS
           request = Request.get(PROMO_RU, content: 'application/json;charset=utf-8')
           all_promo_games = request.dig(:data, :catalog, :search_store, :elements)
           all_promo_games.select do |game|
-            current_and_free?(game)
+            game.extend ScraperHelper
+            game.current_and_free?
           end
-        end
-
-        def a_pack?(game)
-          game[:product_slug].nil?
-        end
-
-        def current_and_free?(game)
-          game_type = game.dig(:promotions, :promotional_offers)
-          return false if game_type.nil? || game_type.empty?
-
-          game.extend Hashie::Extensions::DeepFind
-          game.deep_find(:discount_percentage).zero?
         end
 
         def bootstrap(games_and_addons)
@@ -73,7 +62,7 @@ module EGS
 
         def fetch_title(game)
           title = game[:title]
-          return title if a_pack?(game)
+          return title if game.a_pack?
           return title unless title.empty?
 
           fetch_about(game)[:nav_title]
@@ -86,7 +75,7 @@ module EGS
 
         def parse_description(game)
           description = game[:description]
-          return description if a_pack?(game)
+          return description if game.a_pack?
           return description if !(description.nil? || description.empty?) &&
                                 ru_lang?(description) &&
                                 description.length > 50
@@ -114,16 +103,15 @@ module EGS
         end
 
         def fetch_pubs_n_devs(game)
-          game.extend Hashie::Extensions::DeepFind
-          return game.deep_find(:seller)[:name] if a_pack?(game)
+          return game.deep_find(:seller)[:name] if game.a_pack?
 
           publisher = nil
           developer = nil
           attributes = game[:custom_attributes]
+          pattern = /\w+/
           attributes.each do |attribute|
             key = attribute[:key]
             value = attribute[:value]
-            pattern = /\w+/
             developer = value if key == 'developerName' && value && !value[pattern].nil?
             publisher = value if key == 'publisherName' && value && !value[pattern].nil?
           end
@@ -144,7 +132,6 @@ module EGS
         end
 
         def fetch_date(game, date)
-          game.extend Hashie::Extensions::DeepFind
           Time.parse game.deep_find(date)
         end
       end
