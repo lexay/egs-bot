@@ -1,7 +1,7 @@
 module ScraperHelper
   include Hashie::Extensions::DeepFind
 
-  def a_pack?
+  def has_no_api_info?
     self[:product_slug].nil?
   end
 

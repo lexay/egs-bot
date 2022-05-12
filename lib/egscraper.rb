@@ -2,7 +2,7 @@ module EGS
   class Promotion
     PROMO_RU = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'.freeze
     BASE_URI = 'https://store.epicgames.com/ru/p/'.freeze
-    GAME_INFO_RU = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
+    API_INFO_RU = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
 
     class Request
       class << self
@@ -62,10 +62,10 @@ module EGS
 
         def fetch_title(game)
           title = game[:title]
-          return title if game.a_pack?
+          return title if game.has_no_api_info?
           return title unless title.empty?
 
-          fetch_about(game)[:nav_title]
+          fetch_api(game)[:nav_title]
         end
 
         def fetch_description(game)
@@ -75,12 +75,12 @@ module EGS
 
         def parse_description(game)
           description = game[:description]
-          return description if game.a_pack?
+          return description if game.has_no_api_info?
           return description if !(description.nil? || description.empty?) &&
                                 ru_lang?(description) &&
                                 description.length > 50
 
-          fetch_about(game)[:description]
+          fetch_api(game)[:description]
         end
 
         def ru_lang?(description)
@@ -94,16 +94,16 @@ module EGS
           description.split("\n\n").reject { |sentence| sentence[pattern] }.join("\n\n")
         end
 
-        def fetch_about(game)
+        def fetch_api(game)
           id = fetch_id(game)
-          request = Request.get(GAME_INFO_RU + id)
+          request = Request.get(API_INFO_RU + id)
           base_game = request[:pages].select { |page| page[:type] == 'productHome' }
           base_game.extend Hashie::Extensions::DeepFind
           base_game.deep_find(:about)
         end
 
         def fetch_pubs_n_devs(game)
-          return game.deep_find(:seller)[:name] if game.a_pack?
+          return game.deep_find(:seller)[:name] if game.has_no_api_info?
 
           publisher = nil
           developer = nil
@@ -115,14 +115,16 @@ module EGS
             developer = value if key == 'developerName' && value && !value[pattern].nil?
             publisher = value if key == 'publisherName' && value && !value[pattern].nil?
           end
-          about_section = fetch_about(game) if publisher.nil? || developer.nil?
-          publisher ||= about_section[:publisher_attribution]
-          developer ||= about_section[:developer_attribution]
+          api_info = fetch_api(game) if publisher.nil? || developer.nil?
+          publisher ||= api_info[:publisher_attribution]
+          developer ||= api_info[:developer_attribution]
           [publisher, developer].uniq.join(' - ')
         end
 
         def fetch_id(game)
-          game_slug = game[:product_slug] || game[:url_slug]
+          return game.deep_find(:page_slug) if game.has_no_api_info?
+
+          game_slug = game[:product_slug]
           game_slug.chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
         end
 
