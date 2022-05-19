@@ -19,17 +19,19 @@ module EGS
     def prepare_new_release
       return EGS::LOG.info('No new release! Skipping...') if release_date_ahead?
 
-      games = EGS::Promotion::Parser.run
-      return EGS::LOG.info('Empty date! Skipping...') if release_date_empty?(games)
-      return EGS::LOG.info('Release same as last one! Skipping...') if games == EGS::Models::Release.last.free_games
+      current_games = EGS::Promotion::Parser.run
+      last_games = EGS::Models::Release.last.free_games
+
+      def current_games.release_date_empty?
+        self.empty? || self.first.end_date.nil?
+      end
+
+      return EGS::LOG.info('Empty date! Skipping a day...') && wait('day') if current_games.release_date_empty?
+      return EGS::LOG.info('Release same as last one! Skipping a day...') && wait('day') if current_games == last_games
 
       EGS::Models::Release.init
       games.map { |game| game.release_id = EGS::Models::Release.last.id }
       store(games)
-    end
-
-    def release_date_empty?(games)
-      games.first.end_date.nil?
     end
 
     def store(games)
