@@ -26,8 +26,8 @@ module EGS
         self.empty? || self.first.end_date.nil?
       end
 
-      return EGS::LOG.info('Empty date! Skipping a day...') && wait('day') if current_games.release_date_empty?
-      return EGS::LOG.info('Release same as last one! Skipping a day...') && wait('day') if current_games == last_games
+      return EGS::LOG.info('Empty date! Skipping...') if current_games.release_date_empty?
+      return EGS::LOG.info('Release same as last one! Skipping...') if current_games == last_games
 
       EGS::Models::Release.init
       games.map { |game| game.release_id = EGS::Models::Release.last.id }
