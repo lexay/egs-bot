@@ -17,7 +17,7 @@ module EGS
     private
 
     def prepare_new_release
-      return EGS::LOG.info('No new release! Skipping...') if release_date_ahead?
+      return EGS::LOG.info('No new release yet! Skipping...') if time_to_next_release.positive?
 
       current_games = EGS::Promotion::Parser.run
       last_games = EGS::Models::Release.last.free_games
@@ -89,7 +89,8 @@ module EGS
                   when 'day'
                     60 * 60 * 24
                   when 'next_release'
-                    time_to_next_release + 30
+                    time = time_to_next_release
+                    time.positive? ? time + 30 : 60 * 60 * 5
                   end
       EGS::LOG.info "Sleeping for: #{seconds_to_human_readable(that_much)}..."
       sleep that_much

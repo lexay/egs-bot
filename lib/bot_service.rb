@@ -29,8 +29,9 @@ module EGS
     end
 
     def time_left
-      date = seconds_to_human_readable(time_to_next_release)
-      "Вы подписаны!\nСледующая раздача через: #{date}"
+      time = time_to_next_release
+      time = time.positive? ? seconds_to_human_readable(time) : 'пока нет!'
+      "Вы подписаны!\nСледующая раздача: #{time}"
     end
   end
 end
