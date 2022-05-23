@@ -21,13 +21,13 @@ module EGS
               EGS::LOG.info "User: #{username}(#{chat_id}) is unsubscribed!"
             end
           when Telegram::Bot::Types::Message
-            show_release if message.text == '/start'
+            show_release(chat_id) if message.text == '/start'
           end
         end
       end
     end
 
-    def show_release
+    def show_release(chat_id)
       time = time_to_next_release
       if time.positive?
         time = seconds_to_human_readable(time)
