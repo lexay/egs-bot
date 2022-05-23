@@ -16,22 +16,27 @@ module EGS
             when 'member'
               EGS::Models::User.subscribe(username, chat_id)
               EGS::LOG.info "User: #{username}(#{chat_id}) is subscribed!"
-              send_message(formatted_latest_games, chat_id)
             when 'kicked'
               EGS::Models::User.unsubscribe(chat_id)
               EGS::LOG.info "User: #{username}(#{chat_id}) is unsubscribed!"
             end
           when Telegram::Bot::Types::Message
-            send_message(time_left, chat_id) if message.text == '/start'
+            show_release if message.text == '/start'
           end
         end
       end
     end
 
-    def time_left
+    def show_release
       time = time_to_next_release
-      time = time.positive? ? seconds_to_human_readable(time) : 'пока нет!'
-      "Вы подписаны!\nСледующая раздача: #{time}"
+      if time.positive?
+        time = seconds_to_human_readable(time)
+        send_message(formatted_latest_games, chat_id)
+      else
+        time = 'пока нет!'
+      end
+      notification = "Вы подписаны!\nСледующая раздача: #{time}"
+      send_message(notification, chat_id)
     end
   end
 end
