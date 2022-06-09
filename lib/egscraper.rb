@@ -106,7 +106,7 @@ module EGS
         def fetch_pubs_n_devs(game)
           return game.deep_find(:seller)[:name] if game.has_no_api_info?
 
-          api_info = fetch_api(game) if publisher.nil? || developer.nil?
+          api_info = fetch_api(game)
           publisher = api_info[:publisher_attribution]
           developer = api_info[:developer_attribution]
           [publisher, developer].uniq.join(' - ')
