@@ -12,7 +12,7 @@ module EGS
         header = "Текущая раздача от ЕГС с #{stringify game.start_date} по #{stringify game.end_date}:\n\n"
         header = '' if expiration_date == game.end_date
         expiration_date = game.end_date
-        info << header << game_idx.call(idx) << message
+        info << header << game_idx.call(idx) << message(game)
       end
       info << banned_message
     end
