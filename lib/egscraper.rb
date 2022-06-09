@@ -1,6 +1,7 @@
 module EGS
   class Promotion
     PROMO_RU = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'.freeze
+    PROMO_AR = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=AR&allowCountries=AR'.freeze
     BASE_URI = 'https://store.epicgames.com/ru/p/'.freeze
     API_INFO_RU = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
 
@@ -37,7 +38,7 @@ module EGS
         private
 
         def fetch_games
-          request = Request.get(PROMO_RU, content: 'application/json;charset=utf-8')
+          request = Request.get(PROMO_AR, content: 'application/json;charset=utf-8')
           all_promo_games = request.dig(:data, :catalog, :search_store, :elements)
           all_promo_games.select do |game|
             game.extend ScraperHelper
