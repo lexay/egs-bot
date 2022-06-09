@@ -30,8 +30,8 @@ module EGS
       return EGS::LOG.info('Release same as last one! Skipping...') if current_games == last_games
 
       EGS::Models::Release.init
-      games.map { |game| game.release_id = EGS::Models::Release.last.id }
-      store(games)
+      current_games.map { |game| game.release_id = EGS::Models::Release.last.id }
+      store(current_games)
     end
 
     def store(games)
