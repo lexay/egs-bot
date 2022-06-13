@@ -1,6 +1,7 @@
 ru:
   locale: 'ru'
-  country: 'RU'
+  # Swap RU with AR temporarily for requests due to some games banned for RU
+  country: 'AR'
   header: "Текущая раздача от ЕГС с %{start_date} по %{end_date}:\n\n"
   title: "<strong>Название:</strong> <a href='%{uri}'>%{title}</a>"
   devs: "<strong>Издатель / Разработчик:</strong> %{devs}"
