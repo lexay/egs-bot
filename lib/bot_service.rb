@@ -33,9 +33,9 @@ module EGS
         time = seconds_to_human_readable(time)
         send_message(formatted_latest_games, chat_id)
       else
-        time = 'пока нет!'
+        time = I18n.t(:release_unknown)
       end
-      notification = "Вы подписаны!\nСледующая раздача: #{time}"
+      notification = I18n.t(:subbed, time: time)
       send_message(notification, chat_id)
     end
   end

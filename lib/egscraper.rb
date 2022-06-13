@@ -1,9 +1,10 @@
 module EGS
   class Promotion
-    PROMO_RU = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'.freeze
-    PROMO_AR = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=en-US&country=AR&allowCountries=AR'.freeze
-    BASE_URI = 'https://store.epicgames.com/ru/p/'.freeze
-    API_INFO_RU = 'https://store-content.ak.epicgames.com/api/ru/content/products/'.freeze
+    locale = I18n.t(:locale)
+    country = I18n.t(:country)
+    PROMO = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=#{locale}&country=#{country}&allowCountries=#{country}".freeze
+    API_INFO = "https://store-content.ak.epicgames.com/api/#{locale}/content/products/".freeze
+    BASE_URI = "https://store.epicgames.com/#{locale}/p/".freeze
 
     class Request
       class << self
@@ -38,7 +39,7 @@ module EGS
         private
 
         def fetch_games
-          request = Request.get(PROMO_AR, content: 'application/json;charset=utf-8')
+          request = Request.get(PROMO, content: 'application/json;charset=utf-8')
           all_promo_games = request.dig(:data, :catalog, :search_store, :elements)
           all_promo_games.select do |game|
             game.extend ScraperHelper
@@ -78,14 +79,10 @@ module EGS
           description = game[:description]
           return description if game.has_no_api_info?
           return description if !(description.nil? || description.empty?) &&
-                                ru_lang?(description) &&
-                                description.length > 50
+                                description.length > 50 &&
+                                description.language_iso == I18n.default_locale
 
           fetch_api(game)[:description]
-        end
-
-        def ru_lang?(description)
-          !description[/[А-я]+/].nil?
         end
 
         def sanitize(description)
@@ -97,7 +94,7 @@ module EGS
 
         def fetch_api(game)
           id = fetch_id(game)
-          request = Request.get(API_INFO_RU + id)
+          request = Request.get(API_INFO + id)
           base_game = request[:pages].select { |page| page[:type] == 'productHome' }
           base_game.extend Hashie::Extensions::DeepFind
           base_game.deep_find(:about)

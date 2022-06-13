@@ -1,5 +1,5 @@
 module EGS
-  module Template
+  class Template
     def self.new(games)
       info = ''
       expiration_date = ''
@@ -9,7 +9,7 @@ module EGS
       game_idx = games.count > 1 ? show_idx : show_no_idx
 
       games.each_with_index do |game, idx|
-        header = "Текущая раздача от ЕГС с #{stringify game.start_date} по #{stringify game.end_date}:\n\n"
+        header = I18n.t(:header, start_date: stringify(game.start_date), end_date: stringify(game.end_date))
         header = '' if expiration_date == game.end_date
         expiration_date = game.end_date
         info << header << game_idx.call(idx) << message(game)
@@ -20,30 +20,24 @@ module EGS
     def self.stringify(date)
       day = date.strftime('%-d')
       month_idx = date.strftime('%m').to_i
-      month = %w[января февраля марта апреля мая июня июля августа сентября октября ноября декабря][month_idx - 1]
+      month = I18n.t(:month_names)[month_idx]
       "#{day} #{month}"
     end
 
     def self.message(game)
       <<~MESSAGE
-        <strong>Название:</strong> <a href='#{game.game_uri}'>#{game.title}</a>
+        #{I18n.t(:title, uri: game.game_uri, title: game.title)}
 
-        <strong>Издатель / Разработчик:</strong> #{game.pubs_n_devs}
+        #{I18n.t(:devs, devs: game.pubs_n_devs)}
 
-        <strong>Описание:</strong>
+        #{I18n.t(:description)}
         #{game.description.truncate(300, separator: '.')}
 
       MESSAGE
     end
 
     def self.banned_message
-      <<~MESSAGE
-
-
-      Как забирать с ЕГС из России описано по ссылке ниже:
-
-      https://dtf.ru/flood/1194376-kak-zabirat-nedostupnye-igry-v-rossii-s-razdach-egs
-      MESSAGE
+      I18n.t(:banned_message)
     end
   end
 end

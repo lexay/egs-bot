@@ -9,6 +9,6 @@ module GameHelper
 
   def formatted_latest_games
     games = latest_games
-    games.empty? ? 'Раздача неизвестна!' : EGS::Template.new(games)
+    games.empty? ? I18n.t(:release_unknown) : EGS::Template.new(games)
   end
 end

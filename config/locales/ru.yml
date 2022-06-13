@@ -1,0 +1,26 @@
+ru:
+  locale: 'ru'
+  country: 'RU'
+  header: "Текущая раздача от ЕГС с %{stringify game.start_date} по %{stringify game.end_date}:\n\n"
+  title: "<strong>Название:</strong> <a href='%{uri}'>%{title}</a>"
+  devs: "<strong>Издатель / Разработчик:</strong> %{devs}"
+  description: "<strong>Описание:</strong>"
+  month_names:
+    - 
+    - января
+    - февраля
+    - марта
+    - апреля
+    - мая
+    - июня
+    - июля
+    - августа
+    - сентября
+    - октября
+    - ноября
+    - декабря
+  date_unknown: 'Дата неизвестна!'
+  release_unknown: 'пока нет!'
+  subbed: "Вы подписаны!\nСледующая раздача: %{time}"
+  time_table: " %{days} дн. : %{hours} ч. : %{minutes} мин. : %{seconds} с."
+  banned_message: "Как забирать с ЕГС из России описано по ссылке ниже:\n\nhttps://dtf.ru/flood/1194376-kak-zabirat-nedostupnye-igry-v-rossii-s-razdach-egs"

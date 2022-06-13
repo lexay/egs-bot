@@ -9,6 +9,6 @@ module TimeHelper
     days, hours_in_sec = time_in_seconds.divmod(60 * 60 * 24)
     hours, minutes_in_sec = hours_in_sec.divmod(60 * 60)
     minutes, seconds = minutes_in_sec.divmod(60)
-    " #{days} дн. : #{hours} ч. : #{minutes} мин. : #{seconds} с."[/ [1-9].+/][1..]
+    I18n.t(:time_table, days: days, hours: hours, minutes: minutes, seconds: seconds)[/ [1-9].+/][1..]
   end
 end
