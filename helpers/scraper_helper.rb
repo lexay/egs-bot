@@ -6,8 +6,8 @@ module ScraperHelper
   end
 
   def current_and_free?
-    game_type = self.dig(:promotions, :promotional_offers)
-    return false if game_type.nil? || game_type.empty?
+    promo = self.dig(:promotions, :promotional_offers)
+    return false if promo.nil? || promo.empty?
 
     self.deep_find(:discount_percentage).zero?
   end
