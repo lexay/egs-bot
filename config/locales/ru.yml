@@ -1,7 +1,7 @@
 ru:
   locale: 'ru'
   country: 'RU'
-  header: "Текущая раздача от ЕГС с %{stringify game.start_date} по %{stringify game.end_date}:\n\n"
+  header: "Текущая раздача от ЕГС с %{start_date} по %{end_date}:\n\n"
   title: "<strong>Название:</strong> <a href='%{uri}'>%{title}</a>"
   devs: "<strong>Издатель / Разработчик:</strong> %{devs}"
   description: "<strong>Описание:</strong>"

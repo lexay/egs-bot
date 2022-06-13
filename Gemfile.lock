@@ -76,6 +76,7 @@ GEM
       axiom-types (~> 0.1)
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
+    whatlanguage (1.0.6)
     yaml (0.2.0)
     zeitwerk (2.5.1)
 
@@ -94,6 +95,7 @@ DEPENDENCIES
   sequel
   telegram-bot-ruby
   time
+  whatlanguage
   yaml
 
 RUBY VERSION
