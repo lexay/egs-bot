@@ -4,7 +4,7 @@ module EGS
       many_to_one :release
 
       def self.next_date
-        last.end_date
+        FreeGame.last.end_date
       end
 
       def eql?(other_item)
@@ -26,7 +26,7 @@ module EGS
       end
 
       def self.chat_ids
-        all.map(&:chat_id)
+        User.all.map(&:chat_id)
       end
 
       def self.subscribe(username, chat_id)
@@ -34,7 +34,7 @@ module EGS
       end
 
       def self.unsubscribe(chat_id)
-        where(chat_id: chat_id).delete
+        User.where(chat_id: chat_id).delete
       end
     end
 

@@ -24,4 +24,10 @@ ru:
   release_unknown: 'пока нет!'
   subbed: "Вы подписаны!\nСледующая раздача: %{time}"
   time_table: " %{days} дн. : %{hours} ч. : %{minutes} мин. : %{seconds} с."
+  # Free games are not up for grabs across the entire EGS platform worldwide and
+  # some titles are even banned in RU atm. A way how to bypass this is described
+  # below.
+  # If you are lucky to live in none of the aforementioned region or country,
+  # and you want to make your regional I18n locale for the project, just replace
+  # the banned_message value with an empty string - ''
   banned_message: "Как забирать с ЕГС из России описано по ссылке ниже:\n\nhttps://dtf.ru/flood/1194376-kak-zabirat-nedostupnye-igry-v-rossii-s-razdach-egs"
