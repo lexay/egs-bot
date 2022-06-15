@@ -1,5 +1,5 @@
-### A few words about the dev and how this all started
-Hi, I'm Alex. And this is my first big project. It was intended for a friend who
+### A few words about how this all started
+This is my first big project. It was intended for a friend who
 did not want any free release from EGS slipping behind his ears.
 
 I started it as a total noob, and as the project grew and I got more skilled

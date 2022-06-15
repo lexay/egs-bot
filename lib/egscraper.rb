@@ -92,14 +92,6 @@ module EGS
           description.split("\n\n").reject { |sentence| sentence[pattern] }.join("\n\n")
         end
 
-        def fetch_api(game)
-          id = fetch_id(game)
-          request = Request.get(API_INFO + id)
-          base_game = request[:pages].select { |page| page[:type] == 'productHome' }
-          base_game.extend Hashie::Extensions::DeepFind
-          base_game.deep_find(:about)
-        end
-
         def fetch_pubs_n_devs(game)
           return game.deep_find(:seller)[:name] if game.has_no_api_info?
 
@@ -107,6 +99,14 @@ module EGS
           publisher = api_info[:publisher_attribution]
           developer = api_info[:developer_attribution]
           [publisher, developer].uniq.join(' - ')
+        end
+
+        def fetch_api(game)
+          id = fetch_id(game)
+          request = Request.get(API_INFO + id)
+          base_game = request[:pages].select { |page| page[:type] == 'productHome' }
+          base_game.extend Hashie::Extensions::DeepFind
+          base_game.deep_find(:about)
         end
 
         def fetch_id(game)
