@@ -33,7 +33,7 @@ module EGS
         time = seconds_to_human_readable(time)
         send_message(formatted_latest_games, chat_id)
       else
-        time = I18n.t(:release_unknown)
+        time = I18n.t(:time_unknown)
       end
       notification = I18n.t(:subbed, time: time)
       send_message(notification, chat_id)
