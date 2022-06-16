@@ -1,4 +1,4 @@
 .env
 todo
 db/latest.dump
-local/*
+db/test.db

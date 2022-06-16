@@ -14,8 +14,8 @@ web crawlers btw!)
 Note: Some countries do not have those free tier releases, but you can bypass it
 for now by changing your region temporarily with the help of VPN.
 
-App on the main branch(this one) is designed to work on a free tear instance of
-Heroku. The app leverages Ruby Threads to overcome the free tear limitations
+App on the main branch(this one) is designed to work on a free tier instance of
+Heroku. The app leverages Ruby Threads to overcome the free tier limitations
 for > 1 launched processes atst and for practice and fun.
 
 I wanna dive into Docker some more(exciting piece of Tech!) in the future, so

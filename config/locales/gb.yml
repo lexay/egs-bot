@@ -1,8 +1,28 @@
-#Note: This yml file is not only about switching to your locale of choice with
-#all the app output in Telegram translated for you in you native language but
-#also it is the config for the API requests. The 'country' entry here is
-#especially important to receive valid info for parsing, so bare this in mind,
-#when manipulating it. The rest is up to you!
+# Note: This yml file is not only about switching to your locale of choice with
+# all the app output in Telegram translated for you in you native language but
+# also it is the config for the API requests.
+# 
+# The 'country' entry here is especially important to receive valid info for
+# parsing, you should be more careful, when manipulating it.
+# 
+# You can choose A2 code of your country from this list down below
+# https://en.wikipedia.org/wiki/Countries_in_the_International_Organization_for_Standardization
+# of course if EGS is available in the country / region of your choosing. If not
+# - pick some other one.
+# 
+# The locale you wish to choose for the info that will be presented to you in
+# your language alongside with all the rest entries, that's up to you!
+# You can check all the available locales supported by EGS by clicking the
+# language selector menu in the navigation bar.
+# 
+# Why all the fuss?
+# 
+# Free games are not up for grabs across the entire EGS platform worldwide and
+# several titles are even banned in some regions. So in order to be notified
+# when a free game is out on EGS, you may want to change the country / region
+# for the request, otherwise you wont be notified at all if the game is banned.
+# Then you can use VPN and change your EGS account's regon / country temporarily
+# (6 months) and you should be able to get it.
 gb:
   country: 'GB'
   locale: 'en-GB'
@@ -28,10 +48,6 @@ gb:
   subbed: "You are subscribed!\nNext release: %{time}"
   time_unknown: 'is yet not known!'
   time_table: " %{days} d. : %{hours} hr. : %{minutes} min. : %{seconds} sec."
-  # Free games are not up for grabs across the entire EGS platform worldwide and
-  # several titles are even banned in some regions.
-  # If you are lucky to live in none of those regions or countries, and you want
-  # to make your I18n config for the project, just leave the banned_message
-  # value as it is - '', otherwise replace it with a guide how to bypass this
-  # limitation in your language, like I did for the ru.yml config.
+# Leave banned_message as it is, an empty string - '', if you dont have any
+# trouble getting games from any free tier releases.
   banned_message: ''
