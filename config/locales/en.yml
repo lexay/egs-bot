@@ -1,0 +1,40 @@
+# If you want your own custom localised version of the app, you can do the
+# following:
+#
+# For the 'country' entry you can choose your 2 digits country code, which you
+# can look up using Wikipedia.
+# https://en.wikipedia.org/wiki/Countries_in_the_International_Organization_for_Standardization
+# 
+# For the 'locale' entry choose one from listed and supported: ar, de, en-US,
+# es-ES, es-MX, fr, it, ja, ko, pl, pt-BR, ru, th, tr, zh-CN, zh-Hant
+#
+# So, in short, you can combine the above two codes to produce a meaningful
+# output, which will be parced and piped to Telegram.
+en:
+  country: 'GB'
+  locale: 'en-US'
+  header: "EGS's current release from %{start_date} upto %{end_date}:\n\n"
+  title: "<strong>Title:</strong> <a href='%{uri}'>%{title}</a>"
+  devs: "<strong>Publisher / Developer:</strong> %{devs}"
+  description: "<strong>Description:</strong>"
+  release_unknown: 'TBD!'
+  month_names:
+    - 
+    - january
+    - february
+    - march
+    - april
+    - may
+    - june
+    - july
+    - august
+    - september
+    - october
+    - november
+    - december
+  subbed: "You are subscribed!\nNext release: %{time}"
+  time_unknown: 'is yet not known!'
+  time_table: " %{days} d. : %{hours} hr. : %{minutes} min. : %{seconds} sec."
+# Leave banned_message as it is, an empty string - '', if you dont have any
+# trouble getting games from any free tier releases.
+  banned_message: ''
