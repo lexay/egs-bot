@@ -9,7 +9,7 @@
 # es-ES, es-MX, fr, it, ja, ko, pl, pt-BR, ru, th, tr, zh-CN, zh-Hant
 #
 # So, in short, you can combine the above two codes to produce a meaningful
-# output, which will be parced and piped to Telegram.
+# output, which will be parsed and piped to Telegram.
 ru:
   # Swap RU with AR temporarily for requests due to some games banned for RU
   country: 'AR'
