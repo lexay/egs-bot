@@ -16,9 +16,7 @@ module EGS
 end
 
 require_relative 'db/models/models'
-Dir['./helpers/*.rb'].each { |f| require_relative f }
-Dir['./lib/*.rb'].each { |f| require_relative f }
-# Dir['./lib/*.rb'].each(&method(:require_relative))
+Dir['./helpers/*.rb', './lib/*.rb'].each { |f| require_relative f }
 
 EGS::Schedule.new.plan
 EGS::TelegramService.new.listen
