@@ -16,7 +16,6 @@ gem 'pg'
 gem 'sequel'
 gem 'telegram-bot-ruby', require: 'telegram/bot'
 gem 'time'
-gem 'whatlanguage', require: 'whatlanguage/string'
 gem 'yaml'
 
 group :development do

@@ -3,7 +3,7 @@ module EGS
     locale = I18n.t(:locale)
     country = I18n.t(:country)
     PROMO = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=#{locale}&country=#{country}&allowCountries=#{country}".freeze
-    API_INFO = "https://store-content.ak.epicgames.com/api/#{locale}/content/products/".freeze
+    API = "https://store-content.ak.epicgames.com/api/#{locale}/content/products/".freeze
     BASE_URI = "https://store.epicgames.com/#{locale}/p/".freeze
 
     class Request
@@ -64,7 +64,7 @@ module EGS
 
         def fetch_title(game)
           title = game[:title]
-          return title if game.has_no_api_info?
+          return title if game.no_api?
           return title unless title.empty?
 
           fetch_api(game)[:nav_title]
@@ -76,11 +76,7 @@ module EGS
         end
 
         def parse_description(game)
-          description = game[:description]
-          return description if game.has_no_api_info?
-          return description if !(description.nil? || description.empty?) &&
-                                description.length > 50 &&
-                                description.language_iso == I18n.default_locale
+          return game[:description] if game.no_api?
 
           fetch_api(game)[:description]
         end
@@ -93,27 +89,27 @@ module EGS
         end
 
         def fetch_pubs_n_devs(game)
-          return game.deep_find(:seller)[:name] if game.has_no_api_info?
+          return game.deep_find(:seller)[:name] if game.no_api?
 
-          api_info = fetch_api(game)
-          publisher = api_info[:publisher_attribution]
-          developer = api_info[:developer_attribution]
+          info = fetch_api(game)
+          publisher = info[:publisher_attribution]
+          developer = info[:developer_attribution]
           [publisher, developer].uniq.join(' - ')
         end
 
         def fetch_api(game)
           id = fetch_id(game)
-          request = Request.get(API_INFO + id)
+          request = Request.get(API + id)
           base_game = request[:pages].select { |page| page[:type] == 'productHome' }
           base_game.extend Hashie::Extensions::DeepFind
           base_game.deep_find(:about)
         end
 
         def fetch_id(game)
-          return game.deep_find(:page_slug) if game.has_no_api_info?
+          return game.deep_find(:page_slug) if game.no_api?
 
-          game_slug = game[:product_slug]
-          game_slug.chomp('/home')[/[-[:alnum:]]+/] # %r{^[^\/]}
+          id = game[:product_slug]
+          id.chomp('/home')[/[-[:alnum:]]+/]
         end
 
         def fetch_uri(game)
