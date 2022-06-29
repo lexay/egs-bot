@@ -7,8 +7,8 @@ module EGS
         FreeGame.last.end_date
       end
 
-      def eql?(other_item)
-        self.title == other_item.title && self.start_date == other_item.start_date
+      def eql?(other)
+        self.title == other.title && self.start_date == other.start_date
       end
 
       def hash
