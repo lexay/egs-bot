@@ -21,10 +21,16 @@ module EGS
             http.request(request)
           end
 
-          (EGS::LOG.info "Response has returned #{response.code}. Exiting..."; exit) unless response.code == '200'
-
-          hash = JSON.parse(response.body)
-          hash.deep_transform_keys! { |key| key.underscore.to_sym }
+          case response.code
+          when '200'
+            hash = JSON.parse(response.body)
+            hash.deep_transform_keys! { |key| key.underscore.to_sym }
+          else
+            exit
+          end
+        rescue SystemExit
+          EGS::LOG.info "Response has returned #{response.code}. Exiting..."
+          []
         end
       end
     end
