@@ -21,8 +21,8 @@ module EGS
             http.request(request)
           end
 
-          case response.code
-          when '200'
+          case response
+          when Net::HTTPOK
             hash = JSON.parse(response.body)
             hash.deep_transform_keys! { |key| key.underscore.to_sym }
           else
