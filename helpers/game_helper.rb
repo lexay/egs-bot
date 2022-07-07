@@ -1,6 +1,6 @@
 module GameHelper
   def query_release
-    EGS::Models::Release.last || EGS::Models::Release.init
+    EGS::Models::Release.last || EGS::Models::Release.new
   end
 
   def format(games)
