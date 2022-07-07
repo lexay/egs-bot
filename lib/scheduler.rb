@@ -17,21 +17,21 @@ module EGS
     private
 
     def prepare_new_release
-      return EGS::LOG.info('No new release yet! Skipping...') if query_time_to_next_release.positive?
+      old_games = query_release.free_games
+      return EGS::LOG.info('No new release yet! Skipping...') if fetch_time_left(old_games).positive?
 
-      current_games = EGS::Promotion::Parser.run
-      last_games = query_latest_release.free_games
+      new_games = EGS::Promotion::Parser.run
+      return EGS::LOG.info('No games! Skipping...') if new_games.empty?
+      return EGS::LOG.info('New games can not have expired date! Skipping...') if fetch_time_left(new_games).negative?
 
-      def current_games.release_date_empty?
-        self.empty? || self.first.end_date.nil?
+      if old_games == new_games
+        old_games.each { |game| game.update(end_date: new_games.last.end_date) }
+        EGS::LOG.info('Old release has been prolongated!')
+      else
+        new_release = EGS::Models::Release.init
+        new_games.map { |game| game.release_id = new_release.id }
+        store(new_games)
       end
-
-      return EGS::LOG.info('Empty date! Skipping...') if current_games.release_date_empty?
-      return EGS::LOG.info('Release same as last one! Skipping...') if current_games == last_games
-
-      current_release = EGS::Models::Release.init
-      current_games.map { |game| game.release_id = current_release.id }
-      store(current_games)
     end
 
     def store(games)
@@ -40,13 +40,13 @@ module EGS
     end
 
     def serve_games_to_users
-      latest_release = query_latest_release
-      latest_games = latest_release.free_games
-      chat_ids = JSON.parse(latest_release.chat_ids_not_served)
+      current_release = query_release
+      current_games = current_release.free_games
+      chat_ids = JSON.parse(current_release.chat_ids_not_served)
       return EGS::LOG.info 'No queued users! Skipping...' if chat_ids.empty?
-      return EGS::LOG.info 'No games! Skipping...' if latest_games.empty?
+      return EGS::LOG.info 'No games! Skipping...' if current_games.empty?
 
-      dispatch(format(latest_games), chat_ids)
+      dispatch(format(current_games), chat_ids)
     end
 
     def dispatch(games, chat_ids)
@@ -81,7 +81,7 @@ module EGS
 
     def dequeue_and_update(chat_ids)
       chat_ids.pop
-      query_latest_release.update(chat_ids_not_served: chat_ids.to_json)
+      query_release.update(chat_ids_not_served: chat_ids.to_json)
     end
 
     def wait(date)
@@ -91,7 +91,7 @@ module EGS
                   when 'day'
                     60 * 60 * 24
                   when 'next_release'
-                    time = query_time_to_next_release
+                    time = fetch_time_left(query_release.free_games)
                     time.positive? ? time + 30 : 60 * 60 * 5
                   end
       EGS::LOG.info "Sleeping for: #{convert_seconds_to_human_readable(that_much)}..."

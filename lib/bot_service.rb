@@ -28,10 +28,11 @@ module EGS
     end
 
     def show_release(chat_id)
-      time = query_time_to_next_release
+      current_games = query_release.free_games
+      time = fetch_time_left(current_games)
       if time.positive?
         time = convert_seconds_to_human_readable(time)
-        send_message(format(query_latest_release.free_games), chat_id)
+        send_message(format(current_games), chat_id)
       else
         time = I18n.t(:time_unknown)
       end

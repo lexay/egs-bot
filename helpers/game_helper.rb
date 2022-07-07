@@ -1,5 +1,5 @@
 module GameHelper
-  def query_latest_release
+  def query_release
     EGS::Models::Release.last || EGS::Models::Release.init
   end
 
