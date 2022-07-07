@@ -3,10 +3,6 @@ module EGS
     class FreeGame < Sequel::Model
       many_to_one :release
 
-      def self.next_date
-        FreeGame.last.end_date
-      end
-
       def eql?(other)
         self.title == other.title && self.start_date == other.start_date
       end
