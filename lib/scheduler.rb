@@ -41,12 +41,14 @@ module EGS
 
     def serve_games_to_users
       current_release = query_release
-      current_games = current_release.free_games
-      chat_ids = JSON.parse(current_release.chat_ids_not_served)
-      return EGS::LOG.info 'No queued users! Skipping...' if chat_ids.empty?
-      return EGS::LOG.info 'No games! Skipping...' if current_games.empty?
 
-      dispatch(format(current_games), chat_ids)
+      chat_ids = current_release.chat_ids_not_served
+      return EGS::LOG.info 'No release has ever been created!' if chat_ids.nil?
+
+      chat_ids = JSON.parse(chat_ids)
+      return EGS::LOG.info 'No queued users! Skipping...' if chat_ids.empty?
+
+      dispatch(format(current_release.free_games), chat_ids)
     end
 
     def dispatch(games, chat_ids)
