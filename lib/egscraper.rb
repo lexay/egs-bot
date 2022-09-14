@@ -35,7 +35,7 @@ module EGS
       end
     end
 
-    class Parser
+    class Scraper
       class << self
         def run
           games = fetch_games
