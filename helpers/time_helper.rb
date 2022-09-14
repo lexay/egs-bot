@@ -1,11 +1,7 @@
 module TimeHelper
   def fetch_time_left(games)
-    next_date = fetch_next_date(games).to_i
+    next_date = games.last&.end_date.to_i
     (next_date - Time.now.to_i).round
-  end
-
-  def fetch_next_date(games)
-    games.last&.end_date
   end
 
   def convert_seconds_to_human_readable(time_in_seconds)
