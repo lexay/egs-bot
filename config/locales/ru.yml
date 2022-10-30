@@ -4,12 +4,14 @@
 # For the 'country' entry you can choose your 2 digits country code, which you
 # can look up using Wikipedia.
 # https://en.wikipedia.org/wiki/Countries_in_the_International_Organization_for_Standardization
+# It will be used for querying the server for avaliable games.
 # 
 # For the 'locale' entry choose one from listed and supported: ar, de, en-US,
 # es-ES, es-MX, fr, it, ja, ko, pl, pt-BR, ru, th, tr, zh-CN, zh-Hant
+# It will be used for choosing the language of the game data, which will be returned from the response.
 #
 # So, in short, you can combine the above two codes to produce a meaningful
-# output, which will be parsed and piped to Telegram.
+# output.
 ru:
   # Swap RU with AR temporarily for requests due to some games banned for RU
   country: 'AR'
@@ -33,8 +35,6 @@ ru:
     - октября
     - ноября
     - декабря
-  subbed: "Вы подписаны!\nСледующая раздача: %{time}"
-  time_unknown: 'дата неизвестна!'
   time_table: " %{days} дн. : %{hours} ч. : %{minutes} мин. : %{seconds} с."
 # Leave banned_message as it is, an empty string - '', if you dont have any
 # trouble getting games from any free tier releases.
