@@ -59,6 +59,7 @@ GEM
       method_source (~> 1.0)
     ruby2_keywords (0.0.5)
     sequel (5.57.0)
+    sqlite3 (1.4.4)
     telegram-bot-ruby (0.19.2)
       dry-inflector
       faraday (~> 1.0)
@@ -88,6 +89,7 @@ DEPENDENCIES
   pg
   pry
   sequel
+  sqlite3
   telegram-bot-ruby
   time
   yaml
@@ -96,4 +98,4 @@ RUBY VERSION
    ruby 2.7.3p183
 
 BUNDLED WITH
-   2.2.19
+   2.3.6

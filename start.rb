@@ -16,4 +16,3 @@ require_relative 'db/models/models'
 Dir['./helpers/*.rb', './lib/*.rb'].each { |f| require_relative f }
 
 EGS::Schedule.new.run
-EGS::TelegramService.new.listen

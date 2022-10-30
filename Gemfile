@@ -21,4 +21,5 @@ gem 'yaml'
 group :development do
   gem 'dotenv'
   gem 'pry'
+  gem 'sqlite3'
 end
