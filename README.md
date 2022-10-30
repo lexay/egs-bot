@@ -8,30 +8,15 @@ with Ruby (my favorite programming language btw!) it received more valuable
 updates.
 
 ### About the project
-And this app's sole purpose is to scrape info about the free games, released by
-EGS and push notifications to subscribed users in Telegram. (love scraping and
-web crawlers btw!)
+1. This app's sole purpose is to scrape info about the free games, when they are
+   released by EGS. Love scraping and web crawlers btw!
 
-##### Features:
-App sends the name, description and link of EGS's freebies to subscribed users
-in Telegram via a bot. It could retrieve more information at the early stage of
-its development, but I decided the data was enough to get the idea what's being
-released. The app got a simplier interface.
+2. Then the app sends the name, description and link of EGS's freebies to
+   subscribed users to a specific channel in Telegram via a bot.
 
-App is designed to work on a free tier instance of Heroku. The app leverages
-Ruby Threads to overcome the free tier limitations for > 1 launched processes
-atst there, so it forks the main process.
-
-App loops over its tasks, it will retry if one of the tasks fails. It waits till
-the next release date after all tasks have succeeded. 
-
-App handles subscribing and unsubscribing users to the bot properly. All users
-subscribed to the bot are saved to your DB, so you will not lose them
-accidentally.
-
-App also saves the state if the user got hes/hers much needed information about
-the released games, so the bot will not make the users angry by sending them the
-same data over and over again in case this task fails(esp. repeatedly).
+The Scraper part of the app could retrieve more information at the early stage
+of its development, but I decided the data was enough to get the idea what's
+being released. The app got a simplier interface.
 
 ### TODO
 I wanna dive into Docker some more(exciting piece of Tech!) in the future, so
@@ -39,13 +24,16 @@ upcoming commits or a new branch even may also include Docker files.
 
 ### CHANGES:
 * Major release 1.0 6/26/2022
+* Rewrite 10/30/2022 (check [old_version branch](https://github.com/lexay/epic_bot/tree/old_version) for the previous version of this bot)
 
 ### How to use
 1. Get your Telegram Bot instance and set it up. [tutorial](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
-2. Clone the project `git clone https://github.com/lexay/epic_bot.git`.
-3. Make your own locale config in `./config/locales/` if needed.
-4. Adjust the app options in `start.rb` if needed.
-6. Deploy to Heroku. I personally recommend using the Heroku CLI. [tutorial](https://devcenter.heroku.com/articles/git)
-7. Setup your Heroku instance of a PostgreSQL DB. [tutorial](https://devcenter.heroku.com/articles/heroku-postgresql)
-8. Set the environment variables for your Telegram Bot and DB on Heroku. [tutorial](https://devcenter.heroku.com/articles/config-vars)
-9. Start the app! :-)
+2. Create a channel in Telegram.
+3. Add your Bot as Admin of the channel.
+4. Clone the project `git clone https://github.com/lexay/epic_bot.git`.
+5. Make your own locale config in `./config/locales/` if needed.
+6. Adjust the app options in `start.rb` if needed.
+7. Deploy to Heroku. I personally recommend using the Heroku CLI. [tutorial](https://devcenter.heroku.com/articles/git)
+8. Setup your Heroku instance of a PostgreSQL DB. [tutorial](https://devcenter.heroku.com/articles/heroku-postgresql)
+9. Set the environment variables: `DATABASE_URL`, `T_TOKEN`, `CHANNEL`. [tutorial](https://devcenter.heroku.com/articles/config-vars)
+10. Start the app! :-)
