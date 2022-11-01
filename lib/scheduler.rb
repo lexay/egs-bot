@@ -7,7 +7,7 @@ module EGS
     def run
       loop do
         prepare_new_release
-        wait 'next_release'
+        wait
       end
     end
 
@@ -43,19 +43,12 @@ module EGS
       EGS::LOG.info 'Games have been dispatched to the channel!'
     end
 
-    def wait(date)
-      that_much = case date
-                  when '5 mins'
-                    60 * 5
-                  when 'day'
-                    60 * 60 * 24
-                  when 'next_release'
-                    current_games = query_release.free_games
-                    time = fetch_time_left(current_games)
-                    time.positive? ? time + 30 : 60 * 60 * 5
-                  end
-      EGS::LOG.info "Sleeping for: #{convert_seconds_to_human_readable(that_much)}..."
-      sleep that_much
+    def wait
+      current_games = query_release.free_games
+      time_left = fetch_time_left(current_games)
+      that_much_seconds = time_left.positive? ? time_left + 30 : 5 * 60 * 60
+      EGS::LOG.info "Sleeping for: #{convert_to_human_readable(that_much_seconds)}..."
+      sleep that_much_seconds
     end
   end
 end
