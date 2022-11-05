@@ -30,7 +30,7 @@ module EGS
           end
         rescue SystemExit
           EGS::LOG.info "Response has returned #{response.code}. Exiting..."
-          []
+          {}
         end
       end
     end
@@ -39,14 +39,16 @@ module EGS
       class << self
         def run
           games = fetch_games
-          bootstrap(games)
+          bootstrap(games) unless games.empty?
         end
 
         private
 
         def fetch_games
-          request = Request.get(PROMO, content: 'application/json;charset=utf-8')
-          all_promo_games = request.dig(:data, :catalog, :search_store, :elements)
+          response = Request.get(PROMO, content: 'application/json;charset=utf-8')
+          return response if response.empty?
+
+          all_promo_games = response.dig(:data, :catalog, :search_store, :elements)
           all_promo_games.select do |game|
             game.extend ScraperHelper
             game.current_and_free?
@@ -105,8 +107,10 @@ module EGS
 
         def fetch_api(game)
           id = fetch_id(game)
-          request = Request.get(API + id)
-          base_game = request[:pages].select { |page| page[:type] == 'productHome' }
+          response = Request.get(API + id)
+          return response if response.empty?
+
+          base_game = response[:pages].select { |page| page[:type] == 'productHome' }
           base_game.extend Hashie::Extensions::DeepFind
           base_game.deep_find(:about)
         end
