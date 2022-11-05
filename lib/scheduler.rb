@@ -23,13 +23,13 @@ module EGS
 
       if current_games == new_games
         current_games.each { |game| game.update(end_date: new_games.last.end_date) }
-        EGS::LOG.info('Old release has been prolongated!')
+        EGS::LOG.info('Current release has been prolongated!')
       else
         new_release = EGS::Models::Release.create
         new_games.map { |game| game.release_id = new_release.id }
         store(new_games)
-        send_to_channel(new_games)
       end
+      send_to_channel(new_games)
     end
 
     def store(games)
