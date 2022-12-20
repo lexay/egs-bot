@@ -2,7 +2,7 @@ require 'rubygems'
 require 'bundler'
 Bundler.setup(:default)
 Bundler.require(:default)
-
+system('rake', 'db:migrate')
 module EGS
   TG_BOT = Telegram::Bot::Client.new(ENV['T_TOKEN'])
   DB = Sequel.connect(ENV['DATABASE_URL'])
