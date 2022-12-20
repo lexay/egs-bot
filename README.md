@@ -19,8 +19,8 @@ of its development, but I decided the data was enough to get the idea what's
 being released. The app got a simplier interface.
 
 ### TODO
-I wanna dive into Docker some more(exciting piece of Tech!) in the future, so
-upcoming commits or a new branch even may also include Docker files.
+[X] [Heroku version](https://github.com/lexay/epic_bot/tree/heroku).
+[X] Docker version. Now its the main version.
 
 ### CHANGES:
 * Major release 1.0 6/26/2022
