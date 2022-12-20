@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+
+  db:
+    image: postgres:13.9-alpine
+    container_name: 'epic_postgres'
+    expose:
+      - 5432
+    environment:
+      POSTGRES_DB: main
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./db_init.sh:/docker-entrypoint-initdb.d/db_init.sh
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: 'epic_bot'
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/epic
+      - T_TOKEN=${T_TOKEN}
+      - CHANNEL=${CHANNEL}
+    depends_on:
+      - db
+
+volumes:
+  postgres:
