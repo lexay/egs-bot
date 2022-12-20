@@ -1,33 +1,21 @@
-FROM ruby:3.1.2-alpine AS builder
+FROM ruby:3.1.2-alpine AS base
 
-
-# Postgress dependancies
+FROM base AS dependancies
 RUN apk update && apk add --no-cache \
   postgresql14-dev \
-  postgresql14-client \
   build-base
 
-
-# Postgress Gemfile for build
-RUN echo 'source "https://rubygems.org"; gem "pg"' > Gemfile
-
+COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-# Clean image
-FROM ruby:3.1.2-alpine
+FROM base
+RUN apk add --update libpq
 
-RUN apk add --no-cache bash
+WORKDIR /home/deploy/app
+RUN adduser -D deploy
+USER deploy
 
-# Copy artifacts
-COPY --from=builder /usr/local/bundle /usr/local/bundle
+COPY --from=dependancies /usr/local/bundle /usr/local/bundle
 
-# RUN adduser -D deploy
-# USER deploy
-
-# WORKDIR /home/deploy/app
-
-# COPY --chown=deploy Gemfile Gemfile.lock ./
-# RUN bundle install
-
-# COPY --chown=deploy test.rb .
-# CMD ["ruby", "/home/app/test.rb"]
+COPY --chown=deploy . .
+CMD ["bundle", "exec", "ruby", "./start.rb"]
