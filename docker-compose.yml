@@ -7,12 +7,19 @@ services:
     expose:
       - 5432
     environment:
-      POSTGRES_DB: main
+      POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ./db_init.sh:/docker-entrypoint-initdb.d/db_init.sh
+      - ./docker/init_pg.sh:/docker-entrypoint-initdb.d/init_pg.sh
+    healthcheck:
+      test: PGPASSWORD=$POSTGRES_PASSWORD psql -U $POSTGRES_USER $POSTGRES_DB -c '\q'
+      interval: 50s
+      timeout: 10s
+      retries: 3
+
+    restart: always
 
   app:
     build:
@@ -24,7 +31,8 @@ services:
       - T_TOKEN=${T_TOKEN}
       - CHANNEL=${CHANNEL}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   postgres:
