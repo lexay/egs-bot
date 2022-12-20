@@ -30,10 +30,14 @@ being released. The app got a simplier interface.
 1. Get your Telegram Bot instance and set it up. [tutorial](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
 2. Create a channel in Telegram.
 3. Add your Bot as Admin of the channel.
-4. Clone the project `git clone https://github.com/lexay/epic_bot.git`.
+4. Clone the project `git clone https://github.com/lexay/epic_bot.git` to your
+   server.
 5. Make your own locale config in `./config/locales/` if needed.
 6. Adjust the app options in `start.rb` if needed.
-7. Deploy to Heroku. I personally recommend using the Heroku CLI. [tutorial](https://devcenter.heroku.com/articles/git)
-8. Setup your Heroku instance of a PostgreSQL DB. [tutorial](https://devcenter.heroku.com/articles/heroku-postgresql)
-9. Set the environment variables: `DATABASE_URL`, `T_TOKEN`, `CHANNEL`. [tutorial](https://devcenter.heroku.com/articles/config-vars)
-10. Start the app! :-)
+7. Set the environment variables in the .env file in the project root directory:
+   `POSTGRES_DB`
+   `POSTGRES_USER`
+   `POSTGRES_PASSWORD`
+   `T_TOKEN`
+   `CHANNEL`
+8. Build and deploy with `docker-compose`. [tutorial](https://docs.docker.com/engine/reference/commandline/compose/)
