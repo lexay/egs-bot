@@ -19,12 +19,13 @@ of its development, but I decided the data was enough to get the idea what's
 being released. The app got a simplier interface.
 
 ### TODO
-[X] [Heroku version](https://github.com/lexay/epic_bot/tree/heroku).
+[X] [Heroku version](https://github.com/lexay/epic_bot/tree/heroku).  
 [X] Docker version. Now its the main version.
 
 ### CHANGES:
 * Major release 1.0 6/26/2022
 * Rewrite 10/30/2022 (check [old_version branch](https://github.com/lexay/epic_bot/tree/old_version) for the previous version of this bot)
+* Docker version released. 12/20/2022
 
 ### How to use
 1. Get your Telegram Bot instance and set it up. [tutorial](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
@@ -34,10 +35,10 @@ being released. The app got a simplier interface.
    server.
 5. Make your own locale config in `./config/locales/` if needed.
 6. Adjust the app options in `start.rb` if needed.
-7. Set the environment variables in the .env file in the project root directory:
-   `POSTGRES_DB`
-   `POSTGRES_USER`
-   `POSTGRES_PASSWORD`
-   `T_TOKEN`
+7. Set the environment variables in the .env file in the project root directory:  
+   `POSTGRES_DB`  
+   `POSTGRES_USER`  
+   `POSTGRES_PASSWORD`  
+   `T_TOKEN`  
    `CHANNEL`
 8. Build and deploy with `docker-compose`. [tutorial](https://docs.docker.com/engine/reference/commandline/compose/)
