@@ -86,7 +86,8 @@ module EGS
         def parse_description(game)
           return game[:description] if game.no_api?
 
-          fetch_api(game)[:short_description]
+          api = fetch_api(game)
+          api[:short_description] || api[:description]
         end
 
         def sanitize(description)
