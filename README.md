@@ -35,10 +35,14 @@ being released. The app got a simplier interface.
    server.
 5. Make your own locale config in `./config/locales/` if needed.
 6. Adjust the app options in `start.rb` if needed.
-7. Set the environment variables in the .env file in the project root directory:  
-   `POSTGRES_DB`  
-   `POSTGRES_USER`  
-   `POSTGRES_PASSWORD`  
-   `T_TOKEN`  
-   `CHANNEL`
+7. Set the environment variables in the `.env` file in the project root directory:  
+```
+   POSTGRES_DB=  
+   POSTGRES_USER=  
+   POSTGRES_PASSWORD=  
+   TG_TOKEN=  
+   TG_CHANNEL=  
+   DELAY_SEC=  
+   TIMEOUT_SEC=  
+```
 8. Build and deploy with `docker-compose`. [tutorial](https://docs.docker.com/engine/reference/commandline/compose/)

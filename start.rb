@@ -4,7 +4,7 @@ Bundler.setup(:default)
 Bundler.require(:default)
 system('rake', 'db:migrate')
 module EGS
-  TG_BOT = Telegram::Bot::Client.new(ENV['T_TOKEN'])
+  TG_BOT = Telegram::Bot::Client.new(ENV['TG_TOKEN'])
   DB = Sequel.connect(ENV['DATABASE_URL'])
   Sequel.default_timezone = :utc
   I18n.load_path << Dir[File.expand_path('config/locales') + '/*.yml']

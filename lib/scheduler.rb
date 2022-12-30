@@ -39,7 +39,7 @@ module EGS
 
     def send_to_channel(games)
       formatted_games = format(games)
-      send_message(formatted_games, ENV['CHANNEL'])
+      send_message(formatted_games, ENV['TG_CHANNEL'])
       EGS::LOG.info 'Games have been dispatched to the channel!'
     end
 
