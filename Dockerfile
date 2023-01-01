@@ -11,9 +11,9 @@ RUN bundle install
 FROM base
 RUN apk add --update libpq
 
-WORKDIR /home/deploy/app
 RUN adduser -D deploy
 USER deploy
+WORKDIR /home/deploy/app
 
 COPY --from=dependancies /usr/local/bundle /usr/local/bundle
 
