@@ -42,7 +42,7 @@ being released. The app got a simplier interface.
    POSTGRES_PASSWORD=  
    TG_TOKEN=  
    TG_CHANNEL=  
-   DELAY_SEC=  
-   TIMEOUT_SEC=  
+   DELAY_SEC=60  
+   TIMEOUT_SEC=1800  
 ```
 8. Build and deploy with `docker-compose`. [tutorial](https://docs.docker.com/engine/reference/commandline/compose/)
