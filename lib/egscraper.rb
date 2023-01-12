@@ -91,10 +91,12 @@ module EGS
         end
 
         def sanitize(description)
-          description.delete! '*#_'
-          description.strip!
           pattern = /!?\[.+\)/
-          description.split("\n\n").reject { |sentence| sentence[pattern] }.join("\n\n")
+          description.strip
+                     .delete('*#_')
+                     .split("\n\n")
+                     .reject { |sentence| sentence[pattern] }
+                     .join("\n\n")
         end
 
         def fetch_pubs_n_devs(game)
@@ -120,7 +122,7 @@ module EGS
           return game.deep_find(:page_slug) if game.no_api?
 
           id = game[:product_slug]
-          id.chomp('/home')[/[-[:alnum:]]+/]
+          id.slice(/(\w-?)+/).chomp('-')
         end
 
         def fetch_uri(game)
