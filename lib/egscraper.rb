@@ -58,24 +58,29 @@ module EGS
         def bootstrap(games_and_addons)
           bootstraped = []
           games_and_addons.each do |game_or_addon|
-            game_attributes =
-              { title: fetch_title(game_or_addon),
-                description: fetch_description(game_or_addon),
-                pubs_n_devs: fetch_pubs_n_devs(game_or_addon),
-                game_uri: fetch_uri(game_or_addon),
-                start_date: fetch_date(game_or_addon, :start_date),
-                end_date: fetch_date(game_or_addon, :end_date) }
-            bootstraped.push(EGS::Models::FreeGame.new(game_attributes))
+            attributes = fetch_attributes(game_or_addon)
+            bootstraped.push(EGS::Models::FreeGame.new(attributes))
           end
           bootstraped
         end
 
-        def fetch_title(game)
-          title = game[:title]
-          return title if game.no_api?
-          return title unless title.empty?
+        def fetch_attributes(game)
+          attributes =
+            { title: fetch_title(game),
+              game_uri: fetch_uri(game),
+              start_date: fetch_date(game, :start_date),
+              end_date: fetch_date(game, :end_date) }
 
-          fetch_api(game)[:nav_title]
+          game = game.api? ? fetch_api(game) : game
+
+          attributes.merge(
+            { description: fetch_description(game),
+              pubs_n_devs: fetch_pubs_n_devs(game) }
+          )
+        end
+
+        def fetch_title(game)
+          game[:title] # || game[:nav_title]
         end
 
         def fetch_description(game)
@@ -84,9 +89,7 @@ module EGS
         end
 
         def parse_description(game)
-          return game[:description] if game.no_api?
-
-          fetch_api(game)[:short_description]
+          game[:short_description] || game[:description]
         end
 
         def sanitize(description)
@@ -99,12 +102,17 @@ module EGS
         end
 
         def fetch_pubs_n_devs(game)
-          return game.deep_find(:seller)[:name] if game.no_api?
-
-          info = fetch_api(game)
-          publisher = info[:publisher_attribution]
-          developer = info[:developer_attribution]
+          publisher = fetch_publisher(game)
+          developer = fetch_developer(game)
           [publisher, developer].uniq.join(' - ')
+        end
+
+        def fetch_publisher(game)
+          game.deep_find(:seller)[:name] || game[:publisher_attribution]
+        end
+
+        def fetch_developer(game)
+          game.deep_find(:seller)[:name] || game[:developer_attribution]
         end
 
         def fetch_api(game)
@@ -112,20 +120,20 @@ module EGS
           response = Request.get(API + id)
           return response if response.empty?
 
-          base_game = response[:pages].select { |page| page[:type] == 'productHome' }
-          base_game.extend Hashie::Extensions::DeepFind
-          base_game.deep_find(:about)
+          base_game = response[:pages]
+                      .select { |page| page[:type] == 'productHome' && page[:_title] =~ /home/i }
+                      .shift
+          base_game.dig(:data, :about)
         end
 
         def fetch_id(game)
-          return game.deep_find(:page_slug) if game.no_api?
-
           id = game[:product_slug]
-          id.slice(/(\w-?)+/).chomp('-')
+          id&.slice(/[A-z0-9-]+/)
         end
 
         def fetch_uri(game)
           id = fetch_id(game)
+          id = id.nil? ? game.deep_find(:page_slug) : id
           BASE_URI + id
         end
 
