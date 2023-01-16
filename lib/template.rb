@@ -26,9 +26,9 @@ module EGS
 
     def self.message(game)
       <<~MESSAGE
-        #{I18n.t(:title, uri: game.game_uri, title: game.title)}
+        #{I18n.t(:title, uri: game.uri, title: game.title)}
 
-        #{I18n.t(:devs, devs: game.pubs_n_devs)}
+        #{I18n.t(:devs, devs: [game.publisher, game.developer].compact.uniq.join(' - '))}
 
         #{I18n.t(:description)}
         #{game.description.truncate(300, separator: '.')}

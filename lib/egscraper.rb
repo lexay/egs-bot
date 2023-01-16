@@ -101,18 +101,12 @@ module EGS
                      .join("\n\n")
         end
 
-        def fetch_pubs_n_devs(game)
-          publisher = fetch_publisher(game)
-          developer = fetch_developer(game)
-          [publisher, developer].uniq.join(' - ')
-        end
-
         def fetch_publisher(game)
-          game.deep_find(:seller)[:name] || game[:publisher_attribution]
+          game.dig(:seller, :name) || game[:publisher_attribution]
         end
 
         def fetch_developer(game)
-          game.deep_find(:seller)[:name] || game[:developer_attribution]
+          game[:developer_attribution]
         end
 
         def fetch_api(game)
