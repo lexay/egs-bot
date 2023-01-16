@@ -76,7 +76,7 @@ module EGS
         end
 
         def fetch_title(game)
-          game[:title] # || game[:nav_title]
+          game[:title] || game[:nav_title]
         end
 
         def fetch_description(game)
@@ -125,6 +125,14 @@ module EGS
           id = fetch_id(game)
           id = id.nil? ? game.deep_find(:page_slug) : id
           BASE_URI + id
+        end
+
+        def fetch_start_date(game)
+          fetch_date(game, :start_date)
+        end
+
+        def fetch_end_date(game)
+          fetch_date(game, :end_date)
         end
 
         def fetch_date(game, date)
