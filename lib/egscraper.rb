@@ -107,7 +107,9 @@ module EGS
 
         def fetch_api(game)
           id = fetch_id(game)
-          response = Request.get(API + id)
+          version = id.slice(/--.+/)
+          base_id = id.chomp(version)
+          response = Request.get(API + base_id)
           return response if response.empty?
 
           base_game = response[:pages]
