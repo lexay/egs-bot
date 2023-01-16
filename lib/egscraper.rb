@@ -65,18 +65,14 @@ module EGS
         end
 
         def fetch_attributes(game)
-          attributes =
-            { title: fetch_title(game),
-              game_uri: fetch_uri(game),
-              start_date: fetch_date(game, :start_date),
-              end_date: fetch_date(game, :end_date) }
-
-          game = game.api? ? fetch_api(game) : game
-
-          attributes.merge(
-            { description: fetch_description(game),
-              pubs_n_devs: fetch_pubs_n_devs(game) }
-          )
+          api = fetch_api(game)
+          attributes = %w[title start_date end_date uri description publisher developer]
+          attributes.reduce(Hash.new) do |hash, atr|
+            method = 'fetch_' + atr
+            called = send(method, game)
+            hash[atr.to_sym] = called.to_s.empty? && api ? send(method, api) : called
+            hash
+          end
         end
 
         def fetch_title(game)
