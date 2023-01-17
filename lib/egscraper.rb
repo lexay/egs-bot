@@ -65,7 +65,7 @@ module EGS
         end
 
         def fetch_attributes(game)
-          api = fetch_api(game)
+          api = fetch_api(game) if game.api?
           attributes = %w[title start_date end_date uri description publisher developer]
           attributes.reduce(Hash.new) do |hash, atr|
             method = 'fetch_' + atr
