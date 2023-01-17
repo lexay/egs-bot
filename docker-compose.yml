@@ -12,9 +12,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ./docker/init_pg.sh:/docker-entrypoint-initdb.d/init_pg.sh
     healthcheck:
-      test: PGPASSWORD=$POSTGRES_PASSWORD psql -U $POSTGRES_USER $POSTGRES_DB -c '\q'
+      test: PGPASSWORD=$POSTGRES_PASSWORD psql --username $POSTGRES_USER --dbname $POSTGRES_DB -c '\q'
       interval: 50s
       timeout: 10s
       retries: 3
@@ -27,7 +26,7 @@ services:
       dockerfile: Dockerfile
     container_name: 'epic_bot'
     environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/epic
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - TG_TOKEN=${TG_TOKEN}
       - TG_CHANNEL=${TG_CHANNEL}
       - DELAY_SEC=${DELAY_SEC}
