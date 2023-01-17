@@ -46,9 +46,9 @@ module EGS
     def wait
       current_games = query_release.free_games
       time_left = fetch_time_left(current_games)
-      that_much_seconds = time_left.positive? ? time_left + ENV['DELAY_SEC'].to_i : ENV['TIMEOUT_SEC'].to_i
-      EGS::LOG.info "Sleeping for: #{convert_to_human_readable(that_much_seconds)}..."
-      sleep that_much_seconds
+      that_many_seconds = time_left.positive? ? time_left + ENV['DELAY_SEC'].to_i : ENV['TIMEOUT_SEC'].to_i
+      EGS::LOG.info "Sleeping: #{convert_to_human_readable(that_many_seconds)}..."
+      sleep that_many_seconds
     end
   end
 end
