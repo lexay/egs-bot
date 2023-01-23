@@ -22,7 +22,7 @@ module EGS
           case response
           when Net::HTTPOK
             hash = JSON.parse(response.body)
-            hash.deep_transform_keys! { |key| key.underscore.to_sym }
+            hash.deep_transform_keys { |key| key.underscore.to_sym }
           else
             exit
           end
