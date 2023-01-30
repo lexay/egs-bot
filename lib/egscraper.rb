@@ -1,10 +1,8 @@
 module EGS
   class Promotion
-    locale = I18n.t(:locale)
-    country = I18n.t(:country)
-    PROMO = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=#{locale}&country=#{country}&allowCountries=#{country}".freeze
-    API = "https://store-content.ak.epicgames.com/api/#{locale}/content/products/".freeze
-    BASE_URI = "https://store.epicgames.com/#{locale}/p/".freeze
+    BASE_URI = "https://store.epicgames.com/#{I18n.t(:locale)}/p/".freeze
+    PROMO = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=#{I18n.t(:locale)}&country=#{I18n.t(:country)}&allowCountries=#{I18n.t(:country)}".freeze
+    CATALOG = 'https://store.epicgames.com/graphql?operationName=getCatalogOffer&variables={"locale":"%s","country":"%s","offerId":"%s","sandboxId":"%s"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"6797fe39bfac0e6ea1c5fce0ecbff58684157595fee77e446b4254ec45ee2dcb"}}'.freeze
 
     class Request
       class << self
@@ -24,13 +22,23 @@ module EGS
           case response
           when Net::HTTPOK
             hash = JSON.parse(response.body)
-            hash.deep_transform_keys! { |key| key.underscore.to_sym }
+            hash.deep_transform_keys { |key| key.underscore.to_sym }
           else
             exit
           end
         rescue SystemExit
           EGS::LOG.info "Response has returned #{response.code}. Exiting..."
           {}
+        end
+      end
+    end
+
+    class RequestGQL < Request
+      class << self
+        def get(gql_string, **options)
+          variables = options.delete(:variables)
+          uri_string = format(gql_string, *variables)
+          super(uri_string, **options)
         end
       end
     end
@@ -65,18 +73,59 @@ module EGS
         end
 
         def fetch_attributes(game)
-          api = fetch_api(game) if game.api?
           attributes = %w[title start_date end_date uri description publisher developer]
+          backend = game.api? ? fetch_api(game) : fetch_gql_catalog(game)
           attributes.reduce(Hash.new) do |hash, atr|
             method = 'fetch_' + atr
-            called = send(method, game)
-            hash[atr.to_sym] = called.to_s.empty? && api ? send(method, api) : called
+            hash[atr.to_sym] = attributes.last(3).include?(atr) ? send(method, backend) : send(method, game)
             hash
           end
         end
 
+        def fetch_api(game)
+          id = fetch_id(game)
+          version = id.slice(/--.+/)
+          base_id = id.chomp(version)
+          response = Request.get(API + base_id)
+          return response if response.empty?
+
+          base_game = response[:pages]
+                      .select { |page| page[:type] == 'productHome' && page[:_title] =~ /home/i }
+                      .shift
+          base_game.dig(:data, :about)
+        end
+
+        def fetch_id(game)
+          id = game[:product_slug]
+          id&.slice(/[A-z0-9-]+/)
+        end
+
+        def fetch_gql_catalog(game)
+          variables = { variables: [I18n.t(:locale), I18n.t(:country), game[:id], game.deep_find(:namespace)] }
+          response = RequestGQL.get(CATALOG, **variables) 
+          response.dig(:data, :catalog, :catalog_offer)
+        end
+
         def fetch_title(game)
-          game[:title] || game[:nav_title]
+          game[:title]
+        end
+
+        def fetch_start_date(game)
+          fetch_date(game, :start_date)
+        end
+
+        def fetch_end_date(game)
+          fetch_date(game, :end_date)
+        end
+
+        def fetch_date(game, date)
+          Time.parse game.deep_find(date)
+        end
+
+        def fetch_uri(game)
+          id = fetch_id(game)
+          id = id.nil? ? game.deep_find(:page_slug) : id
+          BASE_URI + id
         end
 
         def fetch_description(game)
@@ -98,47 +147,11 @@ module EGS
         end
 
         def fetch_publisher(game)
-          game.dig(:seller, :name) || game[:publisher_attribution]
+          game[:publisher_attribution] || game[:publisher_display_name]
         end
 
         def fetch_developer(game)
-          game[:developer_attribution]
-        end
-
-        def fetch_api(game)
-          id = fetch_id(game)
-          version = id.slice(/--.+/)
-          base_id = id.chomp(version)
-          response = Request.get(API + base_id)
-          return response if response.empty?
-
-          base_game = response[:pages]
-                      .select { |page| page[:type] == 'productHome' && page[:_title] =~ /home/i }
-                      .shift
-          base_game.dig(:data, :about)
-        end
-
-        def fetch_id(game)
-          id = game[:product_slug]
-          id&.slice(/[A-z0-9-]+/)
-        end
-
-        def fetch_uri(game)
-          id = fetch_id(game)
-          id = id.nil? ? game.deep_find(:page_slug) : id
-          BASE_URI + id
-        end
-
-        def fetch_start_date(game)
-          fetch_date(game, :start_date)
-        end
-
-        def fetch_end_date(game)
-          fetch_date(game, :end_date)
-        end
-
-        def fetch_date(game, date)
-          Time.parse game.deep_find(date)
+          game[:developer_attribution] || game[:developer_display_name]
         end
       end
     end
