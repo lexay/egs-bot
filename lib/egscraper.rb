@@ -67,7 +67,7 @@ module EGS
           bootstraped = []
           games_and_addons.each do |game_or_addon|
             attributes = fetch_attributes(game_or_addon)
-            bootstraped.push(EGS::Models::FreeGame.new(attributes))
+            bootstraped.push(Models::FreeGame.new(attributes))
           end
           bootstraped
         end

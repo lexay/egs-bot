@@ -14,6 +14,9 @@ module EGS
 
     class Release < Sequel::Model
       one_to_many :free_games
+      def self.last
+        super || self.new
+      end
     end
   end
 end
