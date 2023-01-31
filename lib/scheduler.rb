@@ -1,7 +1,5 @@
 module EGS
   class Schedule
-    include BotHelper
-    include GameHelper
     include TimeHelper
 
     def run
@@ -14,40 +12,44 @@ module EGS
     private
 
     def prepare_new_release
-      current_games = query_release.free_games
-      return EGS::LOG.info('No new release yet! Skipping...') if fetch_time_left(current_games).positive?
+      current_games = Models::Release.last.free_games
+      return LOG.info('No new release yet! Skipping...') if fetch_time_left(current_games).positive?
 
-      new_games = EGS::Promotion::Scraper.run
-      return EGS::LOG.info('No games! Skipping...') if new_games.empty?
-      return EGS::LOG.info('New games can not have expired date! Skipping...') if fetch_time_left(new_games).negative?
+      new_games = Promotion::Scraper.run
+      return LOG.info('No games! Skipping...') if new_games.empty?
+      return LOG.info('New games can not have expired date! Skipping...') if fetch_time_left(new_games).negative?
 
       if current_games == new_games
         current_games.each { |game| game.update(end_date: new_games.last.end_date) }
-        EGS::LOG.info('Current release has been prolongated!')
+        LOG.info('Current release has been prolongated!')
       else
-        new_release = EGS::Models::Release.create
+        new_release = Models::Release.create
         new_games.map { |game| game.release_id = new_release.id }
         store(new_games)
       end
-      send_to_channel(new_games)
+      formatted = format(new_games)
+      send_to_channel(formatted)
     end
 
     def store(games)
       games.each(&:save)
-      EGS::LOG.info 'Games have been successfully saved to Database!'
+      LOG.info 'Games have been successfully saved to Database!'
     end
 
-    def send_to_channel(games)
-      formatted_games = format(games)
-      send_message(formatted_games, ENV['TG_CHANNEL'])
-      EGS::LOG.info 'Games have been dispatched to the channel!'
+    def format(games)
+      games.empty? ? I18n.t(:release_unknown) : Template.new(games)
+    end
+
+    def send_to_channel(text)
+      TG_BOT.api.send_message(chat_id: ENV['TG_CHANNEL'], text:, parse_mode: 'html')
+      LOG.info 'Games have been dispatched to the channel!'
     end
 
     def wait
-      current_games = query_release.free_games
+      current_games = Models::Release.last.free_games
       time_left = fetch_time_left(current_games)
       that_many_seconds = time_left.positive? ? time_left + ENV['DELAY_SEC'].to_i : ENV['TIMEOUT_SEC'].to_i
-      EGS::LOG.info "Sleeping: #{convert_to_human_readable(that_many_seconds)}..."
+      LOG.info "Sleeping: #{convert_to_human_readable(that_many_seconds)}..."
       sleep that_many_seconds
     end
   end
