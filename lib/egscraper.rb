@@ -27,7 +27,7 @@ module EGS
             exit
           end
         rescue SystemExit
-          EGS::LOG.info "Response has returned #{response.code}. Exiting..."
+          LOG.info "Response has returned #{response.code}. Exiting..."
           {}
         end
       end
