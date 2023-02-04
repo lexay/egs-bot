@@ -1,6 +1,7 @@
 module EGS
   class Promotion
     BASE_URI = "https://store.epicgames.com/#{I18n.t(:locale)}/p/".freeze
+    API = "https://store-content.ak.epicgames.com/api/#{I18n.t(:locale)}/content/products/".freeze
     PROMO = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=#{I18n.t(:locale)}&country=#{I18n.t(:country)}&allowCountries=#{I18n.t(:country)}".freeze
     CATALOG = 'https://store.epicgames.com/graphql?operationName=getCatalogOffer&variables={"locale":"%s","country":"%s","offerId":"%s","sandboxId":"%s"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"6797fe39bfac0e6ea1c5fce0ecbff58684157595fee77e446b4254ec45ee2dcb"}}'.freeze
 
