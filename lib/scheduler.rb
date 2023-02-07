@@ -24,25 +24,15 @@ module EGS
         LOG.info('Current release has been prolongated!')
       else
         new_release = Models::Release.create
-        new_games.map { |game| game.release_id = new_release.id }
-        store(new_games)
+        new_games.map do |game|
+          game.release_id = new_release.id
+          game.save
+        end
+        LOG.info 'Games have been successfully saved to Database!'
       end
-      formatted = format(new_games)
-      send_to_channel(formatted)
-    end
 
-    def store(games)
-      games.each(&:save)
-      LOG.info 'Games have been successfully saved to Database!'
-    end
-
-    def format(games)
-      games.empty? ? I18n.t(:release_unknown) : Template.new(games)
-    end
-
-    def send_to_channel(text)
-      TG_BOT.api.send_message(chat_id: ENV['TG_CHANNEL'], text:, parse_mode: 'html')
-      LOG.info 'Games have been dispatched to the channel!'
+      formatted = Formatter.format(new_games:, template: TelegramTemplate)
+      Notifier.new(BOT).push(formatted)
     end
 
     def wait

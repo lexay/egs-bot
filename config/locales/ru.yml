@@ -14,13 +14,12 @@
 # output.
 ru:
   # Swap RU with AR temporarily for requests due to some games banned for RU
-  country: 'AR'
-  locale: 'ru'
+  country: AR
+  locale: ru
   header: "Текущая раздача от ЕГС с %{start_date} по %{end_date}:\n\n"
-  title: "<strong>Название:</strong> <a href='%{uri}'>%{title}</a>"
-  devs: "<strong>Издатель / Разработчик:</strong> %{devs}"
-  description: "<strong>Описание:</strong>"
-  release_unknown: 'Пока ничего нет!'
+  title: Название
+  devs: Издатель / Разработчик
+  description: Описание
   month_names:
     - 
     - января
@@ -39,6 +38,6 @@ ru:
 # Leave banned_message as it is, an empty string - '', if you dont have any
 # trouble getting games from any free tier releases.
   banned_message: |+
-    <strong>Как забирать с ЕГС из России описано по ссылке ниже:</strong>
+    Как забирать с ЕГС из России описано по ссылке ниже
 
     https://dtf.ru/flood/1194376-kak-zabirat-nedostupnye-igry-v-rossii-s-razdach-egs
