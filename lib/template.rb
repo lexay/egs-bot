@@ -1,5 +1,5 @@
 module EGS
-  class Template
+  class DefaultTemplate
     def self.new(games)
       info = ''
       expiration_date = ''
@@ -26,11 +26,11 @@ module EGS
 
     def self.message(game)
       <<~MESSAGE
-        #{I18n.t(:title, uri: game.uri, title: game.title)}
+        #{I18n.t(:title)}: #{game.title}
 
-        #{I18n.t(:devs, devs: [game.publisher, game.developer].compact.uniq.join(' - '))}
+        #{I18n.t(:devs)}: #{[game.publisher, game.developer].compact.uniq.join(' - ')}
 
-        #{I18n.t(:description)}
+        #{I18n.t(:description)}:
         #{game.description.truncate(300, separator: '.')}
 
       MESSAGE
@@ -38,6 +38,20 @@ module EGS
 
     def self.banned_message
       I18n.t(:banned_message)
+    end
+  end
+
+  class TelegramTemplate < DefaultTemplate
+    def self.message(game)
+      <<~MESSAGE
+        <strong>#{I18n.t(:title)}:</strong> <a href="#{game.uri}">#{game.title}</a>
+
+        <strong>#{I18n.t(:devs)}:</strong> #{[game.publisher, game.developer].compact.uniq.join(' - ')}
+
+        <strong>#{I18n.t(:description)}:</strong>
+        #{game.description.truncate(300, separator: '.')}
+
+      MESSAGE
     end
   end
 end

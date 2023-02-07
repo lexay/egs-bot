@@ -13,13 +13,12 @@
 # So, in short, you can combine the above two codes to produce a meaningful
 # output.
 en:
-  country: 'GB'
-  locale: 'en-US'
+  country: GB
+  locale: en-US
   header: "EGS's current release from %{start_date} upto %{end_date}:\n\n"
-  title: "<strong>Title:</strong> <a href='%{uri}'>%{title}</a>"
-  devs: "<strong>Publisher / Developer:</strong> %{devs}"
-  description: "<strong>Description:</strong>"
-  release_unknown: 'TBD!'
+  title: Title
+  devs: Publisher / Developer
+  description: Description
   month_names:
     - 
     - january
