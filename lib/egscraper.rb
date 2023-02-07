@@ -48,7 +48,7 @@ module EGS
       class << self
         def run
           games = fetch_games
-          bootstrap(games) unless games.empty?
+          bootstrap(games)
         end
 
         private
