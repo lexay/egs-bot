@@ -1,4 +1,13 @@
+## Table of Contents:
+- [How it all started](#a-few-words-about-how-this-all-started)
+- [About the Project](#about-the-project)
+- [TODO](#todo)
+- [Changes](#changes)
+- [How to use with Telegram](#how-to-use-with-telegram-bot)
+- [How to use with other bots (e.g., Discord)](#how-to-use-with-other-bots)
+
 ### A few words about how this all started
+
 This is my own first 'big' project in software development. It was intended for
 a friend who did not want any games released by Epic Games Store for free
 slipping behind his ears.
@@ -8,6 +17,7 @@ with Ruby (my favorite programming language btw!) it received more valuable
 updates.
 
 ### About the project
+
 1. This app's sole purpose is to scrape info about the free games, when they are
    released by EGS. Love scraping and web crawlers btw!
 
@@ -19,15 +29,18 @@ of its development, but I decided the data was enough to get the idea what's
 being released. The app got a simplier interface.
 
 ### TODO
+
 [X] [Heroku version](https://github.com/lexay/epic_bot/tree/heroku).  
 [X] Docker version. Now its the main version.
 
-### CHANGES:
+### CHANGES
+
 * Major release 1.0 6/26/2022
 * Rewrite 10/30/2022 (check [old_version branch](https://github.com/lexay/epic_bot/tree/old_version) for the previous version of this bot)
 * Docker version released. 12/20/2022
 
-### How to use
+### How to use with Telegram Bot
+
 1. Get your Telegram Bot instance and set it up. [tutorial](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
 2. Create a channel in Telegram.
 3. Add your Bot as Admin of the channel.
@@ -46,3 +59,59 @@ being released. The app got a simplier interface.
    TIMEOUT_SEC=1800  
 ```
 8. Build and deploy with `docker-compose`. [tutorial](https://docs.docker.com/engine/reference/commandline/compose/)
+
+### How to use with other bots
+
+Let's notify users of your lovely Discord Server about EpicStore Freebies!
+1. Repeat steps 4 and 5 from the previous section.
+2. Create and set up your bot.  
+   For a Discord bot, we will create [a webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).  
+   Save your generated `webhook` url to your `.env` file as `DISCORD_WEBHOOK`.  
+   ```
+   # ./.env
+   DISCORD_WEBHOOK="<your_webhook>"
+   ```
+   Set up the other environment variables from step 7 from the previous section
+   excluding the Telegram specific ones, if you dont need it.
+
+3. Let's grab a `gem` to control our bot using Ruby:
+   ```ruby
+   # ./Gemfile
+   gem 'discordrb', require: 'discordrb/webhooks'
+   ```
+4. Instantiate your bot in `start.rb`.
+   ```ruby
+   BOT = Discordrb::Webhooks::Client.new(url: ENV['DISCORD_WEBHOOK'])
+   ```
+5. Implement `message` method in your custom `Template` child class (default
+   template will be used otherwise).
+   ```ruby
+   module EGS
+   class DiscordTemplate < DefaultTemplate
+      def self.message(game)
+         <<~MESSAGE
+         **#{I18n.t(:title)}:** #{game.title}
+
+         **#{I18n.t(:devs)}:** #{[game.publisher, game.developer].compact.uniq.join(' - ')}
+
+         **#{I18n.t(:description)}:**
+         #{game.description.truncate(300, separator: '.')}
+
+         MESSAGE
+      end
+   end
+   end
+   ```
+6. Implement `push` method in `Notifier` class.
+   ```ruby
+   module EGS
+   class Notifier
+   # ...
+      def push(games:)
+         text = format(games:, template: DiscordTemplate)
+         BOT.execute { |builder| builder.content = text }
+      end
+   end
+   # ...
+   end
+   ```
