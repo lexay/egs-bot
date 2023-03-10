@@ -30,8 +30,8 @@ being released. The app got a simplier interface.
 
 ### TODO
 
-[X] [Heroku version](https://github.com/lexay/epic_bot/tree/heroku).  
-[X] Docker version. Now its the main version.
+- [X] [Heroku version](https://github.com/lexay/epic_bot/tree/heroku).  
+- [X] Docker version. Now its the main version.
 
 ### CHANGES
 
