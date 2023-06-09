@@ -2,7 +2,7 @@ module EGS
   class Promotion
     BASE_URI = "https://store.epicgames.com/#{I18n.t(:locale)}/p/".freeze
     API = "https://store-content.ak.epicgames.com/api/#{I18n.t(:locale)}/content/products/".freeze
-    PROMO = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=#{I18n.t(:locale)}&country=#{I18n.t(:country)}&allowCountries=#{I18n.t(:country)}".freeze
+    PROMO = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=#{I18n.t(:locale)}&country=#{I18n.t(:country)}&allowCountries=#{I18n.t(:country)}".freeze
     CATALOG = 'https://store.epicgames.com/graphql?operationName=getCatalogOffer&variables={"locale":"%s","country":"%s","offerId":"%s","sandboxId":"%s"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"6797fe39bfac0e6ea1c5fce0ecbff58684157595fee77e446b4254ec45ee2dcb"}}'.freeze
 
     class Request
@@ -25,11 +25,9 @@ module EGS
             hash = JSON.parse(response.body)
             hash.deep_transform_keys { |key| key.underscore.to_sym }
           else
-            exit
+            LOG.info "Response has returned #{response.code}, #{response.body} from #{uri} ..."
+            Hash.new
           end
-        rescue SystemExit
-          LOG.info "Response has returned #{response.code}. Exiting..."
-          {}
         end
       end
     end
@@ -75,12 +73,17 @@ module EGS
 
         def fetch_attributes(game)
           attributes = %w[title start_date end_date uri description publisher developer]
-          backend = game.api? ? fetch_api(game) : fetch_gql_catalog(game)
+          backend = fetch_backend(game)
           attributes.reduce(Hash.new) do |hash, atr|
             method = 'fetch_' + atr
             hash[atr.to_sym] = attributes.last(3).include?(atr) ? send(method, backend) : send(method, game)
             hash
           end
+        end
+
+        def fetch_backend(game)
+          api = fetch_api(game)
+          api.empty? ? fetch_gql_catalog(game) : api
         end
 
         def fetch_api(game)
@@ -97,7 +100,7 @@ module EGS
         end
 
         def fetch_id(game)
-          id = game[:product_slug]
+          id = game[:product_slug] || game.deep_find(:page_slug)
           id&.slice(/[A-z0-9-]+/)
         end
 
@@ -125,7 +128,6 @@ module EGS
 
         def fetch_uri(game)
           id = fetch_id(game)
-          id = id.nil? ? game.deep_find(:page_slug) : id
           BASE_URI + id
         end
 
