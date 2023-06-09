@@ -68,25 +68,39 @@ Let's notify users of your lovely Discord Server about EpicStore Freebies!
    For a Discord bot, we will create [a webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).  
    Save your generated `webhook` url to your `.env` file as `DISCORD_WEBHOOK`.  
    ```
-   # ./.env
+   #.env
+   #...
    DISCORD_WEBHOOK="<your_webhook>"
+   #...
    ```
    Set up the other environment variables from step 7 from the previous section
    excluding the Telegram specific ones, if you dont need it.
 
 3. Let's grab a `gem` to control our bot using Ruby:
+
    ```ruby
-   # ./Gemfile
+   #Gemfile
+   #...
    gem 'discordrb', require: 'discordrb/webhooks'
+   #...
    ```
+
 4. Instantiate your bot in `start.rb`.
+
    ```ruby
-   BOT = Discordrb::Webhooks::Client.new(url: ENV['DISCORD_WEBHOOK'])
+   #start.rb
+   #...
+   DISCORD_BOT = Discordrb::Webhooks::Client.new(url: ENV['DISCORD_WEBHOOK'])
+   #...
    ```
+
 5. Implement `message` method in your custom `Template` child class (default
    template will be used otherwise).
+
    ```ruby
+   #lib/template.rb
    module EGS
+   #...
    class DiscordTemplate < DefaultTemplate
       def self.message(game)
          <<~MESSAGE
@@ -102,16 +116,31 @@ Let's notify users of your lovely Discord Server about EpicStore Freebies!
    end
    end
    ```
+
 6. Implement `push` method in `Notifier` class.
+
    ```ruby
+   #lib/notifier.rb
    module EGS
-   class Notifier
-   # ...
-      def push(games:)
-         text = format(games:, template: DiscordTemplate)
-         BOT.execute { |builder| builder.content = text }
-      end
-   end
-   # ...
+     class Notifier
+       #...
+       def push(text)
+          BOT.execute { |builder| builder.content = text }
+       end
+     end
    end
    ```
+
+7. Run task in `scheduler.rb`.
+
+    ```ruby
+    #lib/scheduler.rb
+    #...
+    def prepare_new_release
+      #...
+      formatted = Formatter.format(new_games:, template: DiscordTemplate)
+      Notifier.new(DISCORD_BOT).push(formatted)
+      #...
+    end
+    #...
+    ```
