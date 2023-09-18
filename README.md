@@ -123,9 +123,8 @@ Let's notify users of your lovely Discord Server about EpicStore Freebies!
    #lib/notifier.rb
    module EGS
      class Notifier
-       #...
-       def push(text)
-          BOT.execute { |builder| builder.content = text }
+       def self.push(text)
+          DISCORD_BOT.execute { |builder| builder.content = text }
        end
      end
    end
@@ -138,9 +137,7 @@ Let's notify users of your lovely Discord Server about EpicStore Freebies!
     #...
     def prepare_new_release
       #...
-      formatted = Formatter.format(new_games:, template: DiscordTemplate)
-      Notifier.new(DISCORD_BOT).push(formatted)
-      #...
+      Notifier.push(Formatter.format(new_games:, template: DiscordTemplate))
     end
     #...
     ```
