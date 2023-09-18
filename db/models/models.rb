@@ -10,10 +10,13 @@ module EGS
       def hash
         self.title.hash ^ self.start_date.hash
       end
+
+      alias == eql?
     end
 
     class Release < Sequel::Model
       one_to_many :free_games
+
       def self.last
         super || self.new
       end
