@@ -31,8 +31,7 @@ module EGS
         LOG.info 'Games have been successfully saved to Database!'
       end
 
-      formatted = Formatter.format(new_games:, template: TelegramTemplate)
-      Notifier.new(BOT).push(formatted)
+      Notifier.push(Formatter.format(new_games:, template: TelegramTemplate))
     end
 
     def wait
