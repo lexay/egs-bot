@@ -5,43 +5,6 @@ module EGS
     PROMO = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=#{I18n.t(:locale)}&country=#{I18n.t(:country)}&allowCountries=#{I18n.t(:country)}".freeze
     CATALOG = 'https://store.epicgames.com/graphql?operationName=getCatalogOffer&variables={"locale":"%s","country":"%s","offerId":"%s","sandboxId":"%s"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"6797fe39bfac0e6ea1c5fce0ecbff58684157595fee77e446b4254ec45ee2dcb"}}'.freeze
 
-    class Request
-      class << self
-        def get(uri_string, **options)
-          uri = URI.parse(uri_string)
-          request = Net::HTTP::Get.new(uri)
-
-          request['Accept'] = 'application/json, text/plain, */*'
-          request['Content-Type'] ||= options[:content]
-
-          secure = { use_ssl: uri.scheme == 'https' }
-
-          response = Net::HTTP.start(uri.hostname, uri.port, secure) do |http|
-            http.request(request)
-          end
-
-          case response
-          when Net::HTTPOK
-            hash = JSON.parse(response.body)
-            hash.deep_transform_keys { |key| key.underscore.to_sym }
-          else
-            LOG.info "Response has returned #{response.code}, #{response.body} from #{uri} ..."
-            Hash.new
-          end
-        end
-      end
-    end
-
-    class RequestGQL < Request
-      class << self
-        def get(gql_string, **options)
-          variables = options.delete(:variables)
-          uri_string = format(gql_string, *variables)
-          super(uri_string, **options)
-        end
-      end
-    end
-
     class Scraper
       class << self
         def run
