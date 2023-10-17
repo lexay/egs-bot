@@ -17,7 +17,7 @@ module EGS
 
         case res
         when Net::HTTPOK
-          hash = JSON.parse(response.body)
+          hash = JSON.parse(res.body)
           hash.deep_transform_keys { |key| key.underscore.to_sym }
         else
           LOG.info "Response has returned #{res.code}, #{res.body} from #{uri} ..."
