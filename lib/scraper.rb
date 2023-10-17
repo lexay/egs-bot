@@ -1,10 +1,10 @@
 module EGS
   class Promotion
-    BASE_URI = "https://store.epicgames.com/#{I18n.t(:locale)}/p/".freeze
-    API = "https://store-content.ak.epicgames.com/api/#{I18n.t(:locale)}/content/products/".freeze
     PROMO = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=#{I18n.t(:locale)}&country=#{I18n.t(:country)}&allowCountries=#{I18n.t(:country)}".freeze
+    API = "https://store-content.ak.epicgames.com/api/#{I18n.t(:locale)}/content/products/".freeze
     GQL = 'https://store.epicgames.com/graphql'.freeze
     GQL_CATALOG = "[{\"query\":\"query catalogQuery($productNamespace: String!, $offerId: String!, $locale: String) {\\n Catalog {\\n catalogOffer(namespace: $productNamespace, id: $offerId, locale: $locale) {\\n title\\n description\\n developerDisplayName\\n publisherDisplayName\\n}\\n}\\n }\\n\",\"variables\":{\"productNamespace\":\"%s\",\"offerId\":\"%s\",\"locale\":\"%s\"}}]".freeze
+    BASE_URI = "https://store.epicgames.com/#{I18n.t(:locale)}/p/".freeze
 
     class Scraper
       class << self
