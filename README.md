@@ -57,6 +57,7 @@ being released. The app got a simplier interface.
    TG_CHANNEL=  
    DELAY_SEC=60  
    TIMEOUT_SEC=1800  
+   USER_AGENT=  
 ```
 8. Build and deploy with `docker-compose`. [tutorial](https://docs.docker.com/engine/reference/commandline/compose/)
 
