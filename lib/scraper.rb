@@ -19,63 +19,68 @@ module EGS
           response = Request.get(PROMO, content: 'application/json;charset=utf-8')
           return response if response.empty?
 
-          all_promo_games = response.dig(:data, :catalog, :search_store, :elements)
-          all_promo_games.select do |game|
+          promoted_games = response.dig(:data, :catalog, :search_store, :elements)
+          promoted_games.select do |game|
             game.extend ScraperHelper
             game.current_and_free?
           end
         end
 
         def bootstrap(games_and_addons)
-          bootstraped = []
-          games_and_addons.each do |game_or_addon|
+          games_and_addons.map do |game_or_addon|
             attributes = fetch_attributes(game_or_addon)
-            bootstraped.push(Models::FreeGame.new(attributes))
+            Models::FreeGame.new(attributes)
           end
-          bootstraped
         end
 
         def fetch_attributes(game)
           attributes = %w[title start_date end_date uri description publisher developer]
           backend = fetch_backend(game)
-          attributes.reduce(Hash.new) do |hash, atr|
+          attributes.inject(Hash.new) do |hash, atr|
             method = 'fetch_' + atr
-            hash[atr.to_sym] = attributes.last(3).include?(atr) ? send(method, backend) : send(method, game)
+            k = atr.to_sym
+            v = attributes.last(3).include?(atr) ? send(method, backend) : send(method, game)
+            hash.store(k, v)
             hash
           end
         end
 
         def fetch_backend(game)
           api = fetch_api(game)
-          api.empty? ? fetch_gql_catalog(game) : api
+          api.empty? ? fetch_gql(game) : api
         end
 
         def fetch_api(game)
-          id = fetch_id(game)
-          version = id.slice(/--.+/)
-          base_id = id.chomp(version)
-          response = Request.get(API + base_id)
+          slug = fetch_slug(game)
+          version = slug.slice(/--.+/)
+          base_slug = slug.chomp(version)
+          response = Request.get(API + base_slug)
           return response if response.empty?
 
-          base_game = response[:pages]
-                      .select { |page| page[:type] == 'productHome' && page[:_title] =~ /home/i }
-                      .shift
-          base_game.dig(:data, :about)
+          response
+            .dig(:pages)
+            .select { |p| p.dig(:type) == 'productHome' && p.dig(:_title) =~ /home/i }
+            .shift
+            .dig(:data, :about)
         end
 
-        def fetch_id(game)
-          id = game[:product_slug] || game.deep_find(:page_slug)
-          id&.slice(/[A-z0-9-]+/)
+        def fetch_slug(game)
+          slug = game.dig(:product_slug) || game.deep_find(:page_slug)
+          slug&.slice(/[A-z0-9-]+/)
         end
 
-        def fetch_gql_catalog(game)
-          variables = { variables: [I18n.t(:locale), I18n.t(:country), game[:id], game.deep_find(:namespace)] }
-          response = RequestGQL.get(CATALOG, **variables) 
+        def fetch_gql(game)
+          id = game.dig(:id)
+          namespace = game.dig(:namespace)
+          locale = I18n.t(:locale)
+          response = Request.post(GQL, id:, namespace:, locale:)
+          return response if response.empty?
+
           response.dig(:data, :catalog, :catalog_offer)
         end
 
         def fetch_title(game)
-          game[:title]
+          game.dig(:title)
         end
 
         def fetch_start_date(game)
@@ -91,34 +96,31 @@ module EGS
         end
 
         def fetch_uri(game)
-          id = fetch_id(game)
-          BASE_URI + id
+          slug = fetch_slug(game)
+          BASE_URI + slug
         end
 
         def fetch_description(game)
-          description = parse_description(game)
+          description = game.dig(:short_description) || game.dig(:description)
           sanitize(description)
-        end
-
-        def parse_description(game)
-          game[:short_description] || game[:description]
         end
 
         def sanitize(description)
           pattern = /!?\[.+\)/
-          description.strip
-                     .delete('*#_')
-                     .split("\n\n")
-                     .reject { |sentence| sentence[pattern] }
-                     .join("\n\n")
+          description
+            &.strip
+            .delete('*#_')
+            .split("\n\n")
+            .reject { |sentence| sentence.slice(pattern) }
+            .join("\n\n")
         end
 
         def fetch_publisher(game)
-          game[:publisher_attribution] || game[:publisher_display_name]
+          game.dig(:publisher_attribution) || game.dig(:publisher_display_name)
         end
 
         def fetch_developer(game)
-          game[:developer_attribution] || game[:developer_display_name]
+          game.dig(:developer_attribution) || game.dig(:developer_display_name)
         end
       end
     end
