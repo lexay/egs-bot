@@ -15,4 +15,4 @@ end
 
 Dir['db/models/models.rb', './helpers/*.rb', './lib/*.rb'].each { |f| require_relative f }
 
-EGS::Schedule.new.run
+EGS::Scheduler.run
