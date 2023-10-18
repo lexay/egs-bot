@@ -34,7 +34,7 @@ ru:
     - октября
     - ноября
     - декабря
-  time_table: " %{days} дн. : %{hours} ч. : %{minutes} мин. : %{seconds} с."
+  time_table: " %{days} дн. : %{hours} ч. : %{minutes} мин. : %{seconds} сек."
 # Leave banned_message as it is, an empty string - '', if you dont have any
 # trouble getting games from any free tier releases.
   banned_message: |+

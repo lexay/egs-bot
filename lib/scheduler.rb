@@ -38,7 +38,7 @@ module EGS
       current_games = Models::Release.last.free_games
       time_left = fetch_time_left(current_games)
       that_many_seconds = time_left.positive? ? time_left + ENV['DELAY_SEC'].to_i : ENV['TIMEOUT_SEC'].to_i
-      LOG.info "Sleeping: #{convert_to_human_readable(that_many_seconds)}..."
+      LOG.info "Sleeping: #{convert_to_human_readable(that_many_seconds)} ..."
       sleep that_many_seconds
     end
   end

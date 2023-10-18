@@ -102,16 +102,11 @@ module EGS
 
         def fetch_description(game)
           description = game.dig(:short_description) || game.dig(:description)
-          sanitize(description)
-        end
-
-        def sanitize(description)
-          pattern = /!?\[.+\)/
           description
-            &.strip
+            .strip
             .delete('*#_')
             .split("\n\n")
-            .reject { |sentence| sentence.slice(pattern) }
+            .reject { |sentence| sentence.slice(/!?\[.+\)/) }
             .join("\n\n")
         end
 
