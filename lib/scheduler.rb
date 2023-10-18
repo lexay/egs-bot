@@ -17,7 +17,6 @@ module EGS
 
       new_games = Promotion::Scraper.run
       return LOG.info('No games! Skipping...') if new_games.empty?
-      return LOG.info('New games can not have expired date! Skipping...') if fetch_time_left(new_games).negative?
 
       current_games = current_release.free_games
       latest_new_game = new_games.sort.last
