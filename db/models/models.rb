@@ -11,6 +11,10 @@ module EGS
         self.title.hash ^ self.start_date.hash
       end
 
+      def <=>(other)
+        self.end_date <=> other.end_date
+      end
+
       alias == eql?
     end
 
@@ -19,6 +23,10 @@ module EGS
 
       def self.last
         super || self.new
+      end
+
+      def time_left
+        self.end_date.nil? ? 0 : (self.end_date - Time.now).ceil
       end
     end
   end

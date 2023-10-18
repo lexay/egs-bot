@@ -12,19 +12,23 @@ module EGS
     private
 
     def prepare_new_release
-      current_games = Models::Release.last.free_games
-      return LOG.info('No new release yet! Skipping...') if fetch_time_left(current_games).positive?
+      current_release = Models::Release.last
+      return LOG.info('No new release yet! Skipping...') if current_release.time_left.positive?
 
       new_games = Promotion::Scraper.run
       return LOG.info('No games! Skipping...') if new_games.empty?
       return LOG.info('New games can not have expired date! Skipping...') if fetch_time_left(new_games).negative?
 
+      current_games = current_release.free_games
+      latest_new_game = new_games.sort.last
       if current_games == new_games
-        current_games.each { |game| game.update(end_date: new_games.last.end_date) }
+        current_games.each { |game| game.update(end_date: latest_new_game.end_date) }
         LOG.info('Current release has been prolongated!')
       else
-        new_release = Models::Release.create
-        new_games.map do |game|
+        new_release = Models::Release.create(
+          start_date: latest_new_game.start_date,
+          end_date: latest_new_game.end_date)
+        new_games.each do |game|
           game.release_id = new_release.id
           game.save
         end
@@ -35,8 +39,7 @@ module EGS
     end
 
     def wait
-      current_games = Models::Release.last.free_games
-      time_left = fetch_time_left(current_games)
+      time_left = Models::Release.last.time_left
       that_many_seconds = time_left.positive? ? time_left + ENV['DELAY_SEC'].to_i : ENV['TIMEOUT_SEC'].to_i
       LOG.info "Sleeping: #{convert_to_human_readable(that_many_seconds)} ..."
       sleep that_many_seconds
