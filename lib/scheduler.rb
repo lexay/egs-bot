@@ -22,8 +22,8 @@ module EGS
         current_games = current_release.free_games
         latest_new_game = new_games.sort.last
         if current_games == new_games
-          current_games.each { |game| game.update(end_date: latest_new_game.end_date) }
-          LOG.info('Current release has been prolongated!')
+          current_release.update(end_date: latest_new_game.end_date)
+          LOG.info('Games from OLD in NEW Release! Updating OLD Release end date!')
         else
           new_release = Models::Release.create(
             start_date: latest_new_game.start_date,
