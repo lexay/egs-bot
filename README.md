@@ -1,3 +1,9 @@
+### Important!
+
+EG's now using Cloudflare as a reverse proxy server for some of their resources
+including GQL DB. Slightly abridged but working version of the app is on the
+[stable]('https://github.com/lexay/egs-bot/tree/stable') branch now.
+
 ## Table of Contents:
 - [How it all started](#a-few-words-about-how-this-all-started)
 - [About the Project](#about-the-project)
