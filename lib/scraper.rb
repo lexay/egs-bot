@@ -53,7 +53,7 @@ module EGS
         def fetch_api(game)
           slug = fetch_slug(game)
           version = slug.slice(/--.+/)
-          base_slug = slug.chomp(version)
+          base_slug = slug.delete_suffix(version)
           response = Request.get(API + base_slug)
           return response if response.empty?
 
