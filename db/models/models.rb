@@ -4,11 +4,15 @@ module EGS
       many_to_one :release
 
       def eql?(other)
-        self.title == other.title && self.start_date == other.start_date
+        self.title == other.title &&
+          self.start_date == other.start_date &&
+          self.end_date == other.end_date
       end
 
       def hash
-        self.title.hash ^ self.start_date.hash
+        self.title.hash ^
+          self.start_date.hash ^
+          self.end_date.hash
       end
 
       def <=>(other)
