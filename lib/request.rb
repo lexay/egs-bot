@@ -20,7 +20,7 @@ module EGS
           hash = JSON.parse(res.body)
           hash.deep_transform_keys { |key| key.underscore.to_sym }
         else
-          LOG.info "Response has returned #{res.code}, #{res.body} from #{uri} ..."
+          LOG.info(I18n.t(:response, code: res.code, message: res.message, uri: res.uri))
           Hash.new
         end
       end
