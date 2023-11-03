@@ -10,7 +10,7 @@ module EGS
   I18n.load_path << Dir[File.expand_path('config/locales') + '/*.yml']
   I18n.default_locale = :ru
   BOT = Telegram::Bot::Client.new(ENV['TG_TOKEN'])
-  LOG = Logger.new($stdout)
+  LOG = Logger.new('./log/egs.log', 3)
 end
 
 Dir['db/models/models.rb', './helpers/*.rb', './lib/*.rb'].each { |f| require_relative f }

@@ -31,9 +31,12 @@ services:
       TG_CHANNEL: ${TG_CHANNEL}
       DELAY_SEC: ${DELAY_SEC}
       TIMEOUT_SEC: ${TIMEOUT_SEC}
+    volumes:
+      - log:/home/deploy/app/log
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   postgres:
+  log:
