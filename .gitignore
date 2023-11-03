@@ -1,5 +1,4 @@
 .env
-docker_playground
-todo
+.todo
 db/latest.dump
 db/test.db
