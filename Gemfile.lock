@@ -39,7 +39,6 @@ GEM
     faraday-multipart (1.0.4)
       multipart-post (~> 2)
     faraday-net_http (3.0.2)
-    hashie (5.0.0)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
@@ -83,7 +82,6 @@ PLATFORMS
 DEPENDENCIES
   activesupport
   dotenv
-  hashie
   json
   logger
   net-http
