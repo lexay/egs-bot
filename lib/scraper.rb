@@ -1,5 +1,5 @@
 module EGS
-  class Promotion
+  class Scraper
     PROMO = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=#{I18n.t(:locale)}&country=#{I18n.t(:country)}&allowCountries=#{I18n.t(:country)}".freeze
     BASE_URI = "https://store.epicgames.com/#{I18n.t(:locale)}/p/".freeze
 

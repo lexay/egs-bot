@@ -16,7 +16,7 @@ module EGS
         current_release = Models::Release.last
         return LOG.info(I18n.t(:no_new_release)) if current_release.time_left.positive?
 
-        new_games = Promotion::Scraper.run
+        new_games = Scraper.run
         return LOG.info(I18n.t(:no_games)) if new_games.empty?
 
         current_games = current_release.free_games
