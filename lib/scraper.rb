@@ -1,6 +1,5 @@
 module EGS
   class Scraper
-    PROMO = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=#{I18n.t(:locale)}&country=#{I18n.t(:country)}&allowCountries=#{I18n.t(:country)}".freeze
     class << self
       def run
         fetch_free_games
@@ -20,7 +19,8 @@ module EGS
       end
 
       def fetch_promoted_games
-        response = Request.get(PROMO)
+        promo = format(ENV['PROMO'], I18n.t(:locale), I18n.t(:country), I18n.t(:country))
+        response = Request.get(promo)
         if response.is_a? Net::HTTPOK
           JSON
             .parse(response.body)

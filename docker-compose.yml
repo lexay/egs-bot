@@ -27,9 +27,9 @@ services:
     container_name: 'epic_bot'
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      PROMO: ${PROMO}
       TG_TOKEN: ${TG_TOKEN}
       TG_CHANNEL: ${TG_CHANNEL}
-      DELAY_SEC: ${DELAY_SEC}
       TIMEOUT_SEC: ${TIMEOUT_SEC}
     volumes:
       - log:/home/deploy/app/log
