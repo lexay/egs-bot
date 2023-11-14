@@ -28,7 +28,7 @@ module EGS
             .dig(:data, :catalog, :search_store, :elements)
             .map { |d| Promotion.new(d) }
         else
-          LOG.info(I18n.t(:response, code: response.code, message: response.message, uri: response.uri))
+          LOG.error(I18n.t(:response, code: response.code, message: response.message, uri: response.uri))
           exit
         end
       end
