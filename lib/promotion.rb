@@ -2,7 +2,7 @@ module EGS
   class Promotion
     BASE_URI = "https://store.epicgames.com/#{I18n.t(:locale)}/p/".freeze
 
-    attr_reader :title, :start_date, :end_date, :slug, :uri, :description, :discount_price, :current_and_free
+    attr_reader :title, :start_date, :end_date, :slug, :uri, :discount_price, :current_and_free
 
     def initialize(data)
       @title = parse_title(data)
@@ -11,12 +11,11 @@ module EGS
       @discount_price = parse_discount_price(data)
       @slug = parse_slug(data)
       @uri = parse_uri
-      @description = parse_description(data)
       @current_and_free = current_and_free?
     end
 
     def to_h
-      { title:, start_date:, end_date:, uri:, description: }
+      { title:, start_date:, end_date:, uri: }
     end
 
     private
@@ -50,17 +49,6 @@ module EGS
 
     def parse_uri
       BASE_URI + slug
-    end
-
-    def parse_description(data)
-      description = data.dig(:short_description) || data.dig(:description)
-      description
-        .strip
-        .delete('*#_')
-        .split("\n\n")
-        .reject { |sentence| sentence.slice(/!?\[.+\)/) }
-        .join("\n\n")
-        .capitalize
     end
 
     def parse_discount_price(data)

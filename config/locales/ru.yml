@@ -18,8 +18,6 @@ ru:
   locale: ru
   header: "Текущая раздача от ЕГС с %{start_date} по %{end_date}:\n\n"
   title: Название
-  devs: Издатель / Разработчик
-  description: Описание
   month_names:
     - 
     - января

@@ -17,8 +17,6 @@ en:
   locale: en-US
   header: "EGS's current release from %{start_date} upto %{end_date}:\n\n"
   title: Title
-  devs: Publisher / Developer
-  description: Description
   month_names:
     - 
     - january

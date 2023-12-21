@@ -28,9 +28,6 @@ module EGS
       <<~MESSAGE
         #{I18n.t(:title)}: #{game.title}
 
-        #{I18n.t(:description)}:
-        #{game.description.truncate(300, separator: '.')}
-
       MESSAGE
     end
 
@@ -43,9 +40,6 @@ module EGS
     def self.message(game)
       <<~MESSAGE
         <strong>#{I18n.t(:title)}:</strong> <a href="#{game.uri}">#{game.title}</a>
-
-        <strong>#{I18n.t(:description)}:</strong>
-        #{game.description.truncate(300, separator: '.')}
 
       MESSAGE
     end
