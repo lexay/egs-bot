@@ -16,7 +16,6 @@ en:
   country: GB
   locale: en-US
   header: "EGS's current release from %{start_date} upto %{end_date}:\n\n"
-  title: Title
   month_names:
     - 
     - january

@@ -17,7 +17,6 @@ ru:
   country: AR
   locale: ru
   header: "Текущая раздача от ЕГС с %{start_date} по %{end_date}:\n\n"
-  title: Название
   month_names:
     - 
     - января

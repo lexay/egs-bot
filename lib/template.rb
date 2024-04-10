@@ -39,7 +39,7 @@ module EGS
   class TelegramTemplate < DefaultTemplate
     def self.message(game)
       <<~MESSAGE
-        <strong>#{I18n.t(:title)}:</strong> <a href="#{game.uri}">#{game.title}</a>
+        <a href="#{game.uri}">#{game.title}</a>
 
       MESSAGE
     end
