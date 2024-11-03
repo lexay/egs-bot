@@ -31,7 +31,6 @@ ru:
     - октября
     - ноября
     - декабря
-  time_table: "Ожидаем: %{days} дн. : %{hours} ч. : %{minutes} мин. : %{seconds} сек. ..."
   response: "Ответ от %{uri} вернул %{code}, %{message} ..."
   no_new_release: Пока новой раздачи нет!
   no_games: В новой раздаче нет игр!

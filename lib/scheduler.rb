@@ -1,13 +1,8 @@
 module EGS
   class Scheduler
     class << self
-      include TimeHelper
-
       def run
-        loop do
           prepare_new_release
-          wait
-        end
       end
 
       private
@@ -35,12 +30,6 @@ module EGS
         LOG.info(I18n.t(:pushed))
       end
 
-      def wait
-        time_left = Models::Release.last.time_left
-        that_many_seconds = time_left.positive? ? time_left : ENV['TIMEOUT_SEC'].to_i
-        time_human = convert_to_human_readable(that_many_seconds)
-        LOG.info(I18n.t(:time_table, **time_human))
-        sleep that_many_seconds
       end
     end
   end

@@ -30,7 +30,6 @@ en:
     - october
     - november
     - december
-  time_table: "Waiting:  %{days} d. : %{hours} hr. : %{minutes} min. : %{seconds} sec. ..."
   response: "Response has returned %{code}, %{message} from %{uri} ..."
   no_new_release: No new release yet! Skipping...
   no_games: No games! Skipping...
