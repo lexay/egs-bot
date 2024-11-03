@@ -21,16 +21,6 @@ module EGS
 
       alias == eql?
     end
-
-    class Release < Sequel::Model
-      one_to_many :free_games
-
-      def self.last
-        super || new
-      end
-
-      def time_left
-        end_date.nil? ? 0 : (end_date - Time.now).ceil
       end
     end
   end
