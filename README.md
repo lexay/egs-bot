@@ -28,6 +28,8 @@ The Scraper part of the app could retrieve more information at the early stage
 of its development, but I decided the data was enough to get the idea what's
 being released. The app got a simplier interface.
 
+Use cronjobs for automating bot tasks on a regular basis!
+
 ### TODO
 
 - [X] [Heroku version](https://github.com/lexay/epic_bot/tree/heroku).  
@@ -38,6 +40,7 @@ being released. The app got a simplier interface.
 * Major release 1.0 6/26/2022
 * Rewrite 10/30/2022 (check [old_version branch](https://github.com/lexay/epic_bot/tree/old_version) for the previous version of this bot)
 * Docker version released. 12/20/2022
+* Docker version rewrite. 11/3/2024
 
 ### How to use with Telegram Bot
 
@@ -47,7 +50,7 @@ being released. The app got a simplier interface.
 4. Clone the project `git clone https://github.com/lexay/epic_bot.git` to your
    server.
 5. Make your own locale config in `./config/locales/` if needed.
-6. Adjust the app options in `start.rb` if needed.
+6. Adjust the app options in `app.rb` if needed.
 7. Set the environment variables in the `.env` file in the project root directory, using `.env.template`
 8. Build and deploy with `docker-compose`. [tutorial](https://docs.docker.com/engine/reference/commandline/compose/)
 
@@ -76,10 +79,10 @@ Let's notify users of your lovely Discord Server about EpicStore Freebies!
    #...
    ```
 
-4. Instantiate your bot in `start.rb`.
+4. Instantiate your bot in `app.rb`.
 
    ```ruby
-   #start.rb
+   #app.rb
    #...
    DISCORD_BOT = Discordrb::Webhooks::Client.new(url: ENV['DISCORD_WEBHOOK'])
    #...
@@ -126,9 +129,9 @@ Let's notify users of your lovely Discord Server about EpicStore Freebies!
     ```ruby
     #lib/scheduler.rb
     #...
-    def prepare_new_release
+    def push_games
       #...
-      Notifier.push(Formatter.format(new_games:, template: DiscordTemplate))
+      Notifier.push(Formatter.format(games:, template: DiscordTemplate))
     end
     #...
     ```
