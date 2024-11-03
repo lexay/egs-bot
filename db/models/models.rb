@@ -1,26 +1,13 @@
 module EGS
   module Models
-    class FreeGame < Sequel::Model
-      many_to_one :release
+    class Game < Sequel::Model
+      plugin :validation_helpers
 
-      def eql?(other)
-        title == other.title &&
-          start_date == other.start_date &&
-          end_date == other.end_date
-      end
-
-      def hash
-        title.hash ^
-          start_date.hash ^
-          end_date.hash
-      end
-
-      def <=>(other)
-        end_date <=> other.end_date
-      end
-
-      alias == eql?
-    end
+      def validate
+        super
+        validates_presence %i[title start_date end_date price]
+        validates_unique %i[title start_date end_date]
+        errors.add(:price, 'cannot be more than 0') if price.positive?
       end
     end
   end
