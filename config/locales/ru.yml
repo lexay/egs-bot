@@ -13,8 +13,8 @@
 # So, in short, you can combine the above two codes to produce a meaningful
 # output.
 ru:
-  # Swap RU with AR temporarily for requests due to some games banned for RU
-  country: AR
+  # Swap RU with KZ temporarily for requests due to some games banned for RU
+  country: KZ
   locale: ru
   header: "Текущая раздача от ЕГС с %{start_date} по %{end_date}:\n\n"
   month_names:
