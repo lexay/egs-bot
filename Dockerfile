@@ -18,4 +18,4 @@ WORKDIR /home/deploy/app
 COPY --from=dependencies /usr/local/bundle /usr/local/bundle
 
 COPY --chown=deploy . .
-CMD ["bundle", "exec", "ruby", "./start.rb"]
+CMD ["bundle", "exec", "ruby", "./app.rb"]
