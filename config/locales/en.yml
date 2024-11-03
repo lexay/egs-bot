@@ -32,10 +32,8 @@ en:
     - december
   response: "Response has returned %{code}, %{message} from %{uri} ..."
   no_new_release: No new release yet! Skipping...
-  no_games: No games! Skipping...
-  delayed: Games from OLD in NEW Release! Data for NEW Release is probably delayed!
-  saved: Games have been saved to Database!
-  pushed: Games have been pushed to the channel!
+  saved: "%{title} have been saved to Database!"
+  pushed: Games have been pushed to the channel(s)!
   # Leave banned_message as it is, an empty string - '', if you dont have any
   # trouble getting games from any free tier releases.
   banned_message: ''

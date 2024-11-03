@@ -33,10 +33,8 @@ ru:
     - декабря
   response: "Ответ от %{uri} вернул %{code}, %{message} ..."
   no_new_release: Пока новой раздачи нет!
-  no_games: В новой раздаче нет игр!
-  delayed: Игры из СТАРОЙ в НОВОЙ Раздаче! Скорее всего раздача запаздывает!
-  saved: Информация об играх успешно сохранена в БД!
-  pushed: Информация об играх успешно передана в канал!
+  saved: "%{title} успешно сохранена в БД!"
+  pushed: Информация об играх успешно передана в канал(ы)!
 # Leave banned_message as it is, an empty string - '', if you dont have any
 # trouble getting games from any free tier releases.
   banned_message: |+

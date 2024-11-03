@@ -18,11 +18,15 @@ module EGS
           LOG.info("#{new_g.title}'s #{e.message}")
           next
         end
-
-        Notifier.push(Formatter.format(new_games:, template: TelegramTemplate))
-        LOG.info(I18n.t(:pushed))
       end
 
+      def push_games
+        games = Models::Game.where(pushed: false)
+        return LOG.info(I18n.t(:no_new_release)) if games.empty?
+
+        Notifier.push(Formatter.format(games:, template: TelegramTemplate))
+        LOG.info(I18n.t(:pushed))
+        games.each { |g| g.update(pushed: true) }
       end
     end
   end
