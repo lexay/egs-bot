@@ -1,20 +1,19 @@
 module EGS
   class DefaultTemplate
     def self.new(games)
-      info = ''
-      expiration_date = ''
+      message = ''
+      prev_game_end_date = nil
 
-      show_idx = ->(idx) { format('%i. ', idx + 1) }
-      show_no_idx = proc { '' }
-      game_idx = games.count > 1 ? show_idx : show_no_idx
+      games.each_with_index do |g, i|
+        header = I18n.t(:header, start_date: stringify(g.start_date), end_date: stringify(g.end_date))
+        next_game_end_date = g.end_date.to_date
+        header = '' if prev_game_end_date == next_game_end_date
+        game_idx = games.count == 1 ? '' : i + 1
+        message << header << game_idx.to_s << '. ' << describe(g)
 
-      games.each_with_index do |game, idx|
-        header = I18n.t(:header, start_date: stringify(game.start_date), end_date: stringify(game.end_date))
-        header = '' if expiration_date == game.end_date
-        expiration_date = game.end_date
-        info << header << game_idx.call(idx) << message(game)
+        prev_game_end_date = next_game_end_date
       end
-      info << banned_message
+      message << I18n.t(:banned_message)
     end
 
     def self.stringify(date)
@@ -24,24 +23,20 @@ module EGS
       "#{day} #{month}"
     end
 
-    def self.message(game)
-      <<~MESSAGE
+    def self.describe(game)
+      <<~INFO
         #{I18n.t(:title)}: #{game.title}
 
-      MESSAGE
-    end
-
-    def self.banned_message
-      I18n.t(:banned_message)
+      INFO
     end
   end
 
   class TelegramTemplate < DefaultTemplate
-    def self.message(game)
-      <<~MESSAGE
+    def self.describe(game)
+      <<~INFO
         <a href="#{game.uri}">#{game.title}</a>
 
-      MESSAGE
+      INFO
     end
   end
 end
