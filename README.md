@@ -1,20 +1,9 @@
 ## Table of Contents:
-- [How it all started](#a-few-words-about-how-this-all-started)
 - [About the Project](#about-the-project)
 - [TODO](#todo)
 - [Changes](#changes)
 - [How to use with Telegram](#how-to-use-with-telegram-bot)
 - [How to use with other bots (e.g., Discord)](#how-to-use-with-other-bots)
-
-### A few words about how this all started
-
-This is my own first 'big' project in software development. It was intended for
-a friend who did not want any games released by Epic Games Store for free
-slipping behind his ears.
-
-I started it as a total noob, and as the project grew and I got more skilled
-with Ruby (my favorite programming language btw!) it received more valuable
-updates.
 
 ### About the project
 
@@ -88,7 +77,7 @@ Let's notify users of your lovely Discord Server about EpicStore Freebies!
    #...
    ```
 
-5. Implement `message` method in your custom `Template` child class (default
+5. Implement `describe` method in your custom `Template` child class (default
    template will be used otherwise).
 
    ```ruby
@@ -96,8 +85,8 @@ Let's notify users of your lovely Discord Server about EpicStore Freebies!
    module EGS
    #...
    class DiscordTemplate < DefaultTemplate
-      def self.message(game)
-         <<~MESSAGE
+      def self.describe(game)
+         <<~INFO
          **#{I18n.t(:title)}:** #{game.title}
 
          **#{I18n.t(:devs)}:** #{[game.publisher, game.developer].compact.uniq.join(' - ')}
@@ -105,7 +94,7 @@ Let's notify users of your lovely Discord Server about EpicStore Freebies!
          **#{I18n.t(:description)}:**
          #{game.description.truncate(300, separator: '.')}
 
-         MESSAGE
+         INFO
       end
    end
    end
