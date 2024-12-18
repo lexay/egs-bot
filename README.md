@@ -21,7 +21,7 @@ Use cronjobs for automating bot tasks on a regular basis!
 
 ### TODO
 
-- [X] [Heroku version](https://github.com/lexay/epic_bot/tree/heroku).  
+- [X] [Heroku version](https://github.com/lexay/epic_bot/tree/heroku).(unmaintained)  
 - [X] Docker version. Now its the main version.
 
 ### CHANGES
@@ -42,6 +42,12 @@ Use cronjobs for automating bot tasks on a regular basis!
 6. Adjust the app options in `app.rb` if needed.
 7. Set the environment variables in the `.env` file in the project root directory, using `.env.template`
 8. Build and deploy with `docker-compose`. [tutorial](https://docs.docker.com/engine/reference/commandline/compose/)
+9. [Make sure](https://docs.docker.com/engine/install/linux-postinstall/) that your current user executes `docker` commands without `sudo` and is in the `docker` group.
+10. Create a cronjob with `crontab -e` to run this app on a regular basis, e.g.:
+   ```bash
+    #This will allow the app to run daily at 18:00 in YOUR TIMEZONE.
+    * 18 * * * docker compose --file <PATH_TO_DOCKER_COMPOSE_FILE> up --detach --no-deps app
+   ```
 
 ### How to use with other bots
 
